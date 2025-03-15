@@ -25,6 +25,9 @@ import YooptaEditor, {
   import { useMemo, useRef, useState } from 'react';
   import { uploadToCloudinary } from '~/utils/cloudinary';
 import { CarouselPlugin } from './withCustomPlugin/customPlugins/Carousel';
+import { json, LoaderFunction } from '@remix-run/node';
+import { connectToDB } from '~/utils/db.server';
+import EditorContent from '~/module/models/editorContent';
 
   
   const plugins = [
@@ -127,8 +130,8 @@ import { CarouselPlugin } from './withCustomPlugin/customPlugins/Carousel';
   const MARKS = [Bold, Italic, CodeMark, Underline, Strike, Highlight];
   
 
-const Editor = () => {
-    const [value, setValue] = useState();
+const Editor = ({data}) => {
+    const [value, setValue] = useState(data);
     const editor = useMemo(() => createYooptaEditor(), []);
     const selectionRef = useRef(null);
   
