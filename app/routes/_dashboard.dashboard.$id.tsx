@@ -2,11 +2,9 @@ import { json,LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { EditorContent } from "~/module/editor/model";
 import NotionLikePageEditor from "~/page/NotionLikePageEditor";
-import { connectToDB } from "~/utils/db.server";
 
 export const loader: LoaderFunction = async ({params}) => {
     try {
-      await connectToDB();
       
       // Fetch all documents (modify as needed)
       const editorContents = await EditorContent.findOne({_id:params.id});
@@ -19,10 +17,10 @@ export const loader: LoaderFunction = async ({params}) => {
   };
 
 const DynamicPage = () => {
-    const data  = useLoaderData()
+    const {data } = useLoaderData<typeof loader>()
     return (
         <div>
-            <NotionLikePageEditor data={data?.data} />
+            <NotionLikePageEditor data={data} />
         </div>
     );
 };

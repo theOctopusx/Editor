@@ -5,10 +5,11 @@ import { MARKS } from "~/components/Editor/marks";
 import { plugins } from "~/components/Editor/plugin";
 import { TOOLS } from "~/components/Editor/tools";
 import { Input } from "~/components/ui/input";
+import { loader } from "~/routes/content";
 
 const NotionLikePageEditor = () => {
     const { id } = useParams();
-    const {data} = useLoaderData(); // Load content from server
+    const {data} = useLoaderData<typeof loader>(); // Load content from server
 
     const editor = useMemo(() => createYooptaEditor(), [id]);
     const selectionRef = useRef(null);
@@ -31,8 +32,7 @@ const NotionLikePageEditor = () => {
 
     const handleContentChange = async (newValue: YooptaContentValue) => {
         setValue(newValue);
-        const editorContent = editor.getEditorValue();
-        console.log(editorContent)
+        // const editorContent = editor.getEditorValue();
         await saveEditorData(title, newValue);
     };
 
