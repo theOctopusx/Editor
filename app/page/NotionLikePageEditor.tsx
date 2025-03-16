@@ -9,42 +9,61 @@ import { loader } from "~/routes/content";
 
 const NotionLikePageEditor = () => {
     const { id } = useParams();
-    const {data} = useLoaderData<typeof loader>(); // Load content from server
+    const { data } = useLoaderData<typeof loader>(); // Fetch content from server
 
     const editor = useMemo(() => createYooptaEditor(), [id]);
     const selectionRef = useRef(null);
 
     const [title, setTitle] = useState(data?.title || "Untitled");
-    const [value, setValue] = useState<YooptaContentValue>(data?.content);
+    const [value, setValue] = useState<YooptaContentValue>(data?.content || {});
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Debounce function to delay API calls while typing
+    function useDebounce(value: string, delay: number) {
+        const [debouncedValue, setDebouncedValue] = useState(value);
+        useEffect(() => {
+            const handler = setTimeout(() => setDebouncedValue(value), delay);
+            return () => clearTimeout(handler);
+        }, [value, delay]);
+        return debouncedValue;
+    }
+
+    const debouncedTitle = useDebounce(title, 500);
 
     useEffect(() => {
         if (data) {
-            setTitle(data.title || title);
-            setValue(data.content || value);
+            setTitle(data.title || "Untitled");
+            setValue(data.content || {});
         }
     }, [id, data]);
 
-    const handleTitleChange = async (e) => {
-        const newTitle = e.target.value;
-        setTitle(newTitle);
-        await saveEditorData(newTitle, value);
+    useEffect(() => {
+        if (debouncedTitle && debouncedTitle !== data?.title) {
+            saveEditorData(debouncedTitle, value);
+        }
+    }, [debouncedTitle]);
+
+    const handleTitleChange = (e) => {
+        setTitle(e.target.value);
     };
 
     const handleContentChange = async (newValue: YooptaContentValue) => {
         setValue(newValue);
-        // const editorContent = editor.getEditorValue();
         await saveEditorData(title, newValue);
     };
 
-    const saveEditorData = async (title: string, content: YooptaContentValue) => {
+    const saveEditorData = async (updatedTitle: string, updatedContent: YooptaContentValue) => {
+        setIsSaving(true);
         try {
             await fetch(`/api/save-editor`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content, contentId: id, title }),
+                body: JSON.stringify({ contentId: id, title: updatedTitle, content: updatedContent }),
             });
         } catch (error) {
             console.error("Error saving content:", error);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -68,6 +87,7 @@ const NotionLikePageEditor = () => {
                 onChange={handleContentChange}
                 autoFocus
             />
+            {isSaving && <p className="text-sm text-gray-500">Saving...</p>}
         </div>
     );
 };

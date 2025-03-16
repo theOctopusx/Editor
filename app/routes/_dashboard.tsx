@@ -49,15 +49,16 @@ export const loader: LoaderFunction = async () => {
 export default function Dashboard() {
   const fetcher = useFetcher(); 
   console.log(fetcher);
-  const { data } = useLoaderData<typeof loader>();
-  console.log(data);
+  const { data: pages } = useLoaderData<typeof loader>();
+  // console.log(data);
 
-  const [pages, setPages] = React.useState(data?.map((page: { _id: string; title: string }) => ({
-    id: page._id,
-    title: page.title,
-    emoji: "👋",
-    workspace: "Personal"
-  })) || []);
+  // const [pages, setPages] = React.useState(data?.map((page: { _id: string; title: string }) => ({
+  //   id: page._id,
+  //   title: page.title,
+  //   emoji: "👋",
+  //   workspace: "Personal"
+  // })) || []);
+  console.log(pages);
 
   const [selectedPage, setSelectedPage] = React.useState<Page | null>(pages[0]);
 
@@ -80,7 +81,7 @@ export default function Dashboard() {
   // 🔄 Update state when new data is fetched
   React.useEffect(() => {
     if (fetcher.data?.data) {
-      // setPages();
+      // setPages(data);
       setSelectedPage(fetcher.data.data[0] || null);
 
     }
@@ -88,7 +89,7 @@ export default function Dashboard() {
    // State for workspaces
    const [workspaces] = React.useState([
     { name: "Personal", emoji: "🏠" },
-    { name: "Work", emoji: "💼" },
+    // { name: "Work", emoji: "💼" },
   ])
 
   return (
@@ -150,9 +151,9 @@ function NotionSidebar({ pages, workspaces, selectedPage, onSelectPage}: NotionS
   const [searchQuery, setSearchQuery] = React.useState("")
   const fetcher = useFetcher();
 
-  const filteredPages = searchQuery
-    ? pages.filter((page) => page.title.toLowerCase().includes(searchQuery.toLowerCase()))
-    : pages
+  // const filteredPages = searchQuery
+  //   ? pages.filter((page) => page.title.toLowerCase().includes(searchQuery.toLowerCase()))
+  //   : pages
 
   return (
     <Sidebar>
@@ -216,7 +217,8 @@ function NotionSidebar({ pages, workspaces, selectedPage, onSelectPage}: NotionS
           <WorkspaceGroup
             key={workspace.name}
             workspace={workspace}
-            pages={filteredPages.filter((page) => page.workspace === workspace.name)}
+            pages={pages}
+            // pages={filteredPages.filter((page) => page.workspace === workspace.name)}
             selectedPage={selectedPage}
             onSelectPage={onSelectPage}
           />
@@ -236,6 +238,7 @@ interface WorkspaceGroupProps {
 
 function WorkspaceGroup({ workspace, pages}: WorkspaceGroupProps) {
   const {id} = useParams()
+  console.log("pages", pages);
   return (
     <SidebarGroup>
       <Collapsible defaultOpen className="group/collapsible">
@@ -252,14 +255,14 @@ function WorkspaceGroup({ workspace, pages}: WorkspaceGroupProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               {pages.map((page) => (
-                <SidebarMenuItem key={page.id}>
-                  <SidebarMenuButton asChild isActive={id === page.id}>
+                <SidebarMenuItem key={page._id}>
+                  <SidebarMenuButton asChild isActive={id === page._id}>
                     <Link 
-                    to={`/dashboard/content/${page.id}`}
+                    to={`/dashboard/content/${page._id}`}
 
                     // onClick={() => onSelectPage(page)} 
                     className="w-full">
-                      <span>{page.emoji || "📄"}</span>
+                      <span>{page?.emoji || "📄"}</span>
                       <span>{page.title}</span>
                     </Link>
                   </SidebarMenuButton>
