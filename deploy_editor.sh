@@ -4,7 +4,6 @@ eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/editor
 
 cd ~/Editor
-git checkout main
 git pull
 
 pnpm install
