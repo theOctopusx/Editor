@@ -20,7 +20,6 @@ export const loader: LoaderFunction = async ({params}) => {
 
 const DynamicPage = () => {
     const data  = useLoaderData()
-    console.log(data);
     return (
         <div>
             <NotionLikePageEditor data={data?.data} />

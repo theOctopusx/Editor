@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { ChevronDown, FilePlus, Home, MoreHorizontal, Plus, Search, Settings } from "lucide-react"
 import { nanoid } from "nanoid"
@@ -23,7 +21,10 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "~/components/ui/sidebar"
-import { Form, Outlet, useFetcher } from "@remix-run/react"
+import { Link, Outlet, useFetcher, useLoaderData } from "@remix-run/react"
+import { json, LoaderFunction } from "@remix-run/node"
+import { connectToDB } from "~/utils/db.server"
+import { EditorContent } from "~/module/editor/model"
 
 // Define the Page type
 interface Page {
@@ -34,7 +35,29 @@ interface Page {
   workspace?: string
 }
 
+export const loader: LoaderFunction = async () => {
+    try {
+      await connectToDB();
+      
+      // Fetch all documents (modify as needed)
+      const editorContents = await EditorContent.find();
+  
+      return json({ success: true, data: editorContents });
+    } catch (error) {
+      console.error("Error fetching editor content:", error);
+      return json({ success: false, error: "Failed to fetch data" }, { status: 500 });
+    }
+  };
+
 export default function Dashboard() {
+  const data = useLoaderData()
+  console.log(data);
+  const pagesData = data?.data.map(page => ({
+    id:page?._id,
+    title:page?.title,
+    emoji:"👋",
+    workspace:"Personal"
+  }))
   // State for pages
   const [pages, setPages] = React.useState<Page[]>([
     {
@@ -65,6 +88,7 @@ export default function Dashboard() {
       emoji: "💡",
       workspace: "Work",
     },
+    ...pagesData
   ])
 
   // State for selected page
@@ -122,35 +146,7 @@ export default function Dashboard() {
           <main className="flex-1 overflow-auto p-4 sm:p-6">
             {selectedPage ? (
               <div className="mx-auto max-w-4xl">
-                <div className="mb-8">
-                  <Input
-                    value={selectedPage.title}
-                    onChange={(e) => {
-                      const updatedPages = pages.map((p) =>
-                        p.id === selectedPage.id ? { ...p, title: e.target.value } : p,
-                      )
-                      setPages(updatedPages)
-                      setSelectedPage({ ...selectedPage, title: e.target.value })
-                    }}
-                    className="border-none text-3xl font-bold px-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                    placeholder="Untitled"
-                  />
-                </div>
                 <Outlet/>
-                <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none">
-                  <textarea
-                    value={selectedPage.content}
-                    onChange={(e) => {
-                      const updatedPages = pages.map((p) =>
-                        p.id === selectedPage.id ? { ...p, content: e.target.value } : p,
-                      )
-                      setPages(updatedPages)
-                      setSelectedPage({ ...selectedPage, content: e.target.value })
-                    }}
-                    className="w-full min-h-[500px] border-none focus:outline-none resize-none bg-transparent"
-                    placeholder="Start writing..."
-                  />
-                </div>
               </div>
             ) : (
               <div className="flex h-full items-center justify-center">
@@ -279,10 +275,14 @@ function WorkspaceGroup({ workspace, pages, selectedPage, onSelectPage }: Worksp
               {pages.map((page) => (
                 <SidebarMenuItem key={page.id}>
                   <SidebarMenuButton asChild isActive={selectedPage?.id === page.id}>
-                    <button onClick={() => onSelectPage(page)} className="w-full">
+                    <Link 
+                    to={`/dashboard/${page.id}`}
+
+                    // onClick={() => onSelectPage(page)} 
+                    className="w-full">
                       <span>{page.emoji || "📄"}</span>
                       <span>{page.title}</span>
-                    </button>
+                    </Link>
                   </SidebarMenuButton>
                   <SidebarMenuAction showOnHover>
                     <MoreHorizontal className="h-4 w-4" />
