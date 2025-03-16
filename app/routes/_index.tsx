@@ -11,12 +11,12 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader: LoaderFunction = async () => {
+export const loader: LoaderFunction = async ({params}) => {
   try {
     await connectToDB();
     
     // Fetch all documents (modify as needed)
-    const editorContents = await EditorContent.find().sort({ createdAt: -1 });
+    const editorContents = await EditorContent.findOne({_id:params.id});
 
     return json({ success: true, data: editorContents });
   } catch (error) {
@@ -29,7 +29,7 @@ export default function Index() {
   const data  = useLoaderData()
   return (
     <main>
-      <Editor data={data?.data[0]?.content}/>
+      <Editor data={data?.data}/>
     </main>
   );
 }

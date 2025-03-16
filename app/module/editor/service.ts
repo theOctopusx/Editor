@@ -1,20 +1,20 @@
 import { json } from "@remix-run/node";
-import EditorContent from "~/module/models/editorContent";
-import { connectToDB } from "~/utils/db.server"; // Function to connect to MongoDB
+import { connectToDB } from "~/utils/db.server";
+import { EditorContent } from "./model";
 
 // Connect to the database
 connectToDB();
 
-export const action = async ({ request }) => {
+export const action = async ({ request }:{request:Request}) => {
   try {
     const body = await request.json();
     const { content,contentId,title } = body;
-    console.log(content);
 
     if (!content) {
       return json({ error: "Content is required" }, { status: 400 });
     }
     
+
     // const newContent = new EditorContent({ content });
     const savetodb = await EditorContent.findOneAndUpdate({_id:contentId},{content,title},{new:true})
 
@@ -25,4 +25,3 @@ export const action = async ({ request }) => {
     return json({ error: "Internal Server Error" }, { status: 500 });
   }
 };
-

@@ -24,10 +24,7 @@ import YooptaEditor, {
   import LinkTool, { DefaultLinkToolRender } from '@yoopta/link-tool';
   import { useMemo, useRef, useState } from 'react';
   import { uploadToCloudinary } from '~/utils/cloudinary';
-import { CarouselPlugin } from './withCustomPlugin/customPlugins/Carousel';
-import { json, LoaderFunction } from '@remix-run/node';
-import { connectToDB } from '~/utils/db.server';
-import EditorContent from '~/module/models/editorContent';
+  import { CarouselPlugin } from './withCustomPlugin/customPlugins/Carousel';
 
   
   const plugins = [
@@ -131,7 +128,8 @@ import EditorContent from '~/module/models/editorContent';
   
 
 const Editor = ({data}) => {
-    const [value, setValue] = useState(data);
+  console.log(data);
+    const [value, setValue] = useState(data?.content);
     const editor = useMemo(() => createYooptaEditor(), []);
     const selectionRef = useRef(null);
   
@@ -144,14 +142,14 @@ const Editor = ({data}) => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ content: newValue }),
+          body: JSON.stringify({ content: newValue,contentId:data?._id }),
         });
     
-        const data = await response.json();
-        if (data.success) {
+        const dataResponse = await response.json();
+        if (dataResponse.success) {
           console.log("Editor content saved successfully");
         } else {
-          console.error("Failed to save content:", data.error);
+          console.error("Failed to save content:", dataResponse.error);
         }
       } catch (error) {
         console.error("Error sending data:", error);
