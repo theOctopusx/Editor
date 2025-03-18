@@ -6,5 +6,5 @@ import { redirect } from "@remix-run/node";
 
 export const action =async () => {
     const result = await EditorContent.create({title:'Untitled',content:{}});
-    return redirect(`/dashboard/${result._id}`)
+    return redirect(`/dashboard/content/${result._id}`)
 }

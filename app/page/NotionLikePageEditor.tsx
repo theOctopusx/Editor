@@ -2,6 +2,7 @@ import { useParams, useLoaderData, useLocation } from "@remix-run/react";
 import YooptaEditor, {
   createYooptaEditor,
   YooptaContentValue,
+  generateId
 } from "@yoopta/editor";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MARKS } from "~/components/Editor/marks";
@@ -20,6 +21,7 @@ const NotionLikePageEditor = () => {
 
   const [title, setTitle] = useState(data?.title || "Untitled");
   const [value, setValue] = useState<YooptaContentValue>(data?.content || {});
+  const [editorId,setEditorId] = useState(generateId())
   console.log(`${id}`, value);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -36,10 +38,13 @@ const NotionLikePageEditor = () => {
   const debouncedTitle = useDebounce(title, 500);
 
   useEffect(() => {
-    if (data) {
-      setTitle(data?.title);
-      setValue(data?.content);
-    }
+
+        if (data) {
+          setEditorId(generateId());
+          setValue(data?.content);
+          setTitle(data?.title);
+        }
+   
   }, [id, data, pathname]);
 
   useEffect(() => {
@@ -102,7 +107,7 @@ const NotionLikePageEditor = () => {
       />
       {data ? (
         <YooptaEditor
-          key={id}
+          key={editorId}
           width={672}
           editor={editor}
           plugins={plugins}
