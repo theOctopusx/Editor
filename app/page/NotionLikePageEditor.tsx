@@ -1,8 +1,8 @@
-import { useParams, useLoaderData, useLocation } from "@remix-run/react";
+import { useParams, useLoaderData } from "@remix-run/react";
 import YooptaEditor, {
   createYooptaEditor,
   YooptaContentValue,
-  generateId
+  generateId,
 } from "@yoopta/editor";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MARKS } from "~/components/Editor/marks";
@@ -12,48 +12,43 @@ import { Input } from "~/components/ui/input";
 import { loader } from "~/routes/content";
 
 const NotionLikePageEditor = () => {
-  const { id } = useParams();
-  const pathname = useLocation().pathname;
-  const { data } = useLoaderData<typeof loader>(); // Fetch content from server
+  const { id } = useParams<{ id: string }>();
+  const { data } = useLoaderData<typeof loader>();
 
-  const editor = useMemo(() => createYooptaEditor(), [id]);
-  const selectionRef = useRef(null);
+  const editor = useMemo(() => createYooptaEditor(), []);
+  const selectionRef = useRef<HTMLDivElement>(null);
 
-  const [title, setTitle] = useState(data?.title || "Untitled");
+  const [title, setTitle] = useState<string>(data?.title || "Untitled");
   const [value, setValue] = useState<YooptaContentValue>(data?.content || {});
-  const [editorId,setEditorId] = useState(generateId())
-  console.log(`${id}`, value);
-  const [isSaving, setIsSaving] = useState(false);
+  const [editorId, setEditorId] = useState<string>(generateId());
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  // Debounce function to delay API calls while typing
-  function useDebounce(value: string, delay: number) {
-    const [debouncedValue, setDebouncedValue] = useState(value);
+  const useDebounce = (input: string, delay: number): string => {
+    const [debouncedValue, setDebouncedValue] = useState<string>(input);
     useEffect(() => {
-      const handler = setTimeout(() => setDebouncedValue(value), delay);
+      const handler = setTimeout(() => setDebouncedValue(input), delay);
       return () => clearTimeout(handler);
-    }, [value, delay]);
+    }, [input, delay]);
     return debouncedValue;
-  }
+  };
 
   const debouncedTitle = useDebounce(title, 500);
 
   useEffect(() => {
-
-        if (data) {
-          setEditorId(generateId());
-          setValue(data?.content);
-          setTitle(data?.title);
-        }
-   
-  }, [id, data, pathname]);
+    if (data) {
+      setEditorId(generateId());
+      setValue(data.content);
+      setTitle(data.title);
+    }
+  }, [id, data]);
 
   useEffect(() => {
     if (debouncedTitle && debouncedTitle !== data?.title) {
       saveEditorData(debouncedTitle, value);
     }
-  }, [debouncedTitle]);
+  }, [debouncedTitle, data?.title, value]);
 
-  const handleTitleChange = (e) => {
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
   };
 
@@ -62,13 +57,10 @@ const NotionLikePageEditor = () => {
     await saveEditorData(title, newValue);
   };
 
-  const saveEditorData = async (
-    updatedTitle: string,
-    updatedContent: YooptaContentValue
-  ) => {
+  const saveEditorData = async (updatedTitle: string, updatedContent: YooptaContentValue) => {
     setIsSaving(true);
     try {
-      await fetch(`/api/save-editor`, {
+      await fetch("/api/save-editor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -83,16 +75,6 @@ const NotionLikePageEditor = () => {
       setIsSaving(false);
     }
   };
-
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  if (!isClient) {
-    return null;
-  }
 
   return (
     <div
@@ -116,7 +98,7 @@ const NotionLikePageEditor = () => {
           selectionBoxRoot={selectionRef}
           value={value}
           onChange={handleContentChange}
-          autoFocus
+        //   autoFocus
         />
       ) : (
         <p>Loading...</p>
