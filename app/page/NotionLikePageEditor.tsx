@@ -142,18 +142,6 @@ const NotionLikePageEditor = () => {
 
   console.log("Hierarchy:", JSON.stringify(hierarchy, null, 2));
 
-  // Debounce hook for title changes
-  const useDebounce = (input: string, delay: number): string => {
-    const [debouncedValue, setDebouncedValue] = useState<string>(input);
-    useEffect(() => {
-      const handler = setTimeout(() => setDebouncedValue(input), delay);
-      return () => clearTimeout(handler);
-    }, [input, delay]);
-    return debouncedValue;
-  };
-
-  // const debouncedTitle = useDebounce(title, 500);
-
   useEffect(() => {
     if (data) {
       setEditorId(generateId());
@@ -162,8 +150,16 @@ const NotionLikePageEditor = () => {
     }
   }, [id, data.content, data.title]);
 
+  // * What this useEffect does is:
+  // User types "Hello" → Timer starts (500ms countdown).
+  // User types "Hello W" → Previous timer is cleared, new 500ms timer starts.
+  // User stops typing → After 500ms, saveEditorData(value) is called.
   useEffect(() => {
-    saveEditorData(value);
+    // * wait for 500ms
+    const timeoutId = setTimeout(() => {
+      saveEditorData(value);
+    }, 500);
+    return () => clearTimeout(timeoutId);
   }, [value, title]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
