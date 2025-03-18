@@ -22,7 +22,6 @@ const NotionLikePageEditor = () => {
   const [value, setValue] = useState<YooptaContentValue>(data?.content || {});
   const [editorId, setEditorId] = useState<string>(generateId());
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  // // State for tracking the currently visible heading.
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
 
   // Extract blocks from the editor content state.
@@ -38,17 +37,28 @@ const NotionLikePageEditor = () => {
       .join(" ");
   };
 
-  // Build the hierarchy for headings and include the block id
+  // Build the hierarchy for headings and include the block id and occurrence index
   const hierarchy = [];
   let currentHeadingOne = null;
   let currentHeadingTwo = null;
+  // Keep track of how many times a heading text has appeared.
+  const headingOccurrences = {};
 
   blocks.forEach((block) => {
     if (block.type.startsWith("Heading")) {
+      const headingText = extractText(block);
+      // Determine the occurrence index for this heading text.
+      if (!headingOccurrences[headingText]) {
+        headingOccurrences[headingText] = 0;
+      }
+      const occurrenceIndex = headingOccurrences[headingText];
+      headingOccurrences[headingText]++;
+
       const node = {
-        id: block.id, // include the block id
+        id: block.id, // block id (if available)
+        text: headingText,
+        occurrenceIndex, // unique index for duplicate texts
         type: block.type,
-        text: extractText(block),
         children: [],
       };
 
@@ -75,27 +85,33 @@ const NotionLikePageEditor = () => {
     }
   });
 
-  // Scroll to a block by its id when clicking on the summary.
-  // Function to scroll to a heading element by matching its text.
-  // It queries for all headings using the known CSS selectors, then finds the one whose text matches.
-  const scrollToHeadingByText = (headingText) => {
-    // Query all heading elements using the known class selectors.
+  // Function to scroll to a heading element by matching its text and occurrence index.
+  const scrollToHeadingByText = (headingText, occurrenceIndex) => {
+    // Query all heading elements using known CSS selectors.
     const selectors =
       ".yoopta-heading-one, .yoopta-heading-two, .yoopta-heading-three";
     const headingElements = Array.from(document.querySelectorAll(selectors));
 
-    // Find the element whose text matches the provided heading text.
-    const matchingElement = headingElements.find((el) => {
+    // Filter to only elements that match the text.
+    const matchingElements = headingElements.filter((el) => {
       return el.innerText.trim() === headingText.trim();
     });
 
-    if (matchingElement) {
-      setActiveHeading(headingText);
-      matchingElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (matchingElements.length > occurrenceIndex) {
+      setActiveHeading(`${headingText}-${occurrenceIndex}`);
+      matchingElements[occurrenceIndex].scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     } else {
-      console.warn("No matching heading found for text:", headingText);
+      console.warn(
+        "No matching heading found for text:",
+        headingText,
+        "at occurrence",
+        occurrenceIndex
+      );
     }
-  }
+  };
 
   // Recursive component to render the hierarchy with clickable headings.
   const renderHierarchy = (nodes) => {
@@ -105,15 +121,16 @@ const NotionLikePageEditor = () => {
           <li key={`${node.id}-${index}`} className="my-1">
             <button
               className={`text-left hover:underline ${
-                activeHeading === node.text
+                activeHeading === `${node.text}-${node.occurrenceIndex}`
                   ? "font-bold text-blue-600"
                   : "font-semibold"
               }`}
-              onClick={() => scrollToHeadingByText(node.text)}
+              onClick={() =>
+                scrollToHeadingByText(node.text, node.occurrenceIndex)
+              }
             >
               {node.text}
             </button>
-
             {node.children &&
               node.children.length > 0 &&
               renderHierarchy(node.children)}
