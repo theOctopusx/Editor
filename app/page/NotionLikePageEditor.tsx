@@ -152,7 +152,7 @@ const NotionLikePageEditor = () => {
     return debouncedValue;
   };
 
-  const debouncedTitle = useDebounce(title, 500);
+  // const debouncedTitle = useDebounce(title, 500);
 
   useEffect(() => {
     if (data) {
@@ -160,13 +160,11 @@ const NotionLikePageEditor = () => {
       setValue(data.content);
       setTitle(data.title);
     }
-  }, [id, data.content,data.title]);
+  }, [id, data.content, data.title]);
 
   useEffect(() => {
-    if (debouncedTitle && debouncedTitle !== data?.title) {
-      saveEditorData(debouncedTitle, value);
-    }
-  }, [debouncedTitle, data?.title, value]);
+    saveEditorData(value);
+  }, [value, title]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
@@ -178,7 +176,7 @@ const NotionLikePageEditor = () => {
   };
 
   const saveEditorData = async (
-    updatedTitle: string,
+    // updatedTitle: string,
     updatedContent: YooptaContentValue
   ) => {
     setIsSaving(true);
@@ -188,7 +186,7 @@ const NotionLikePageEditor = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contentId: id,
-          title: updatedTitle,
+          title,
           content: updatedContent,
         }),
       });
@@ -204,35 +202,36 @@ const NotionLikePageEditor = () => {
       {/* Sidebar Summary */}
       <aside className="w-1/4 p-4 relative">
         <div className="sticky top-0">
-        <h2 className="text-xl font-bold mb-4">Document Summary</h2>
-        {hierarchy.length > 0 ? (
-          renderHierarchy(hierarchy)
-        ) : (
-          <p className="text-sm text-gray-500">No headings available.</p>
-        )}
+          <h2 className="text-xl font-bold mb-4">Document Summary</h2>
+          {hierarchy.length > 0 ? (
+            renderHierarchy(hierarchy)
+          ) : (
+            <p className="text-sm text-gray-500">No headings available.</p>
+          )}
         </div>
       </aside>
 
       {/* Editor Area */}
       <div className="flex-1 pl-4 border" ref={selectionRef}>
-        {data ? (<>
-        <Input
-          value={title}
-          onChange={handleTitleChange}
-          className="border-none text-3xl font-bold px-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-          placeholder="Untitled"
-        />
-          <YooptaEditor
-            key={editorId}
-            width={672}
-            editor={editor}
-            plugins={plugins}
-            tools={TOOLS}
-            marks={MARKS}
-            selectionBoxRoot={selectionRef}
-            value={value}
-            onChange={handleContentChange}
-          />
+        {data ? (
+          <>
+            <Input
+              value={title}
+              onChange={handleTitleChange}
+              className="border-none text-3xl font-bold px-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              placeholder="Untitled"
+            />
+            <YooptaEditor
+              key={editorId}
+              width={672}
+              editor={editor}
+              plugins={plugins}
+              tools={TOOLS}
+              marks={MARKS}
+              selectionBoxRoot={selectionRef}
+              value={value}
+              onChange={handleContentChange}
+            />
           </>
         ) : (
           <p>Loading...</p>
