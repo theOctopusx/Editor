@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useParams, useLoaderData } from "@remix-run/react";
 import YooptaEditor, {
   createYooptaEditor,
   YooptaContentValue,
   generateId,
 } from "@yoopta/editor";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useEffect, useMemo, useRef, useState } from "react";
+import { generateHeadingHierarchy } from "~/components/Editor/editorFunction/generateHeadingHierarchy";
+import { scrollToHeadingByText } from "~/components/Editor/editorFunction/scrollToHeadingByText";
 import { MARKS } from "~/components/Editor/marks";
 import { plugins } from "~/components/Editor/plugin";
 import { TOOLS } from "~/components/Editor/tools";
@@ -24,100 +27,16 @@ const NotionLikePageEditor = () => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
 
-  // Extract blocks from the editor content state.
-  const blocks = value ? Object.values(value) : [];
-
-  // Sort blocks based on the `order` property in meta
-  blocks?.sort((a, b) => a.meta.order - b.meta.order);
-
-  // Utility function to extract text from a block's value array
-  const extractText = (block) => {
-    return block.value
-      .map((item) => item.children.map((child) => child.text).join(""))
-      .join(" ");
-  };
-
-  // Build the hierarchy for headings and include the block id and occurrence index
-  const hierarchy = [];
-  let currentHeadingOne = null;
-  let currentHeadingTwo = null;
-  // Keep track of how many times a heading text has appeared.
-  const headingOccurrences = {};
-
-  blocks.forEach((block) => {
-    if (block.type.startsWith("Heading")) {
-      const headingText = extractText(block);
-      // Determine the occurrence index for this heading text.
-      if (!headingOccurrences[headingText]) {
-        headingOccurrences[headingText] = 0;
-      }
-      const occurrenceIndex = headingOccurrences[headingText];
-      headingOccurrences[headingText]++;
-
-      const node = {
-        id: block.id, // block id (if available)
-        text: headingText,
-        occurrenceIndex, // unique index for duplicate texts
-        type: block.type,
-        children: [],
-      };
-
-      if (block.type === "HeadingOne") {
-        hierarchy.push(node);
-        currentHeadingOne = node;
-        currentHeadingTwo = null;
-      } else if (block.type === "HeadingTwo") {
-        if (currentHeadingOne) {
-          currentHeadingOne.children.push(node);
-        } else {
-          hierarchy.push(node);
-        }
-        currentHeadingTwo = node;
-      } else if (block.type === "HeadingThree") {
-        if (currentHeadingTwo) {
-          currentHeadingTwo.children.push(node);
-        } else if (currentHeadingOne) {
-          currentHeadingOne.children.push(node);
-        } else {
-          hierarchy.push(node);
-        }
-      }
-    }
-  });
+  const hierarchy = generateHeadingHierarchy(value);
 
   // Function to scroll to a heading element by matching its text and occurrence index.
-  const scrollToHeadingByText = (headingText, occurrenceIndex) => {
-    // Query all heading elements using known CSS selectors.
-    const selectors =
-      ".yoopta-heading-one, .yoopta-heading-two, .yoopta-heading-three";
-    const headingElements = Array.from(document.querySelectorAll(selectors));
-
-    // Filter to only elements that match the text.
-    const matchingElements = headingElements.filter((el) => {
-      return el.innerText.trim() === headingText.trim();
-    });
-
-    if (matchingElements.length > occurrenceIndex) {
-      setActiveHeading(`${headingText}-${occurrenceIndex}`);
-      matchingElements[occurrenceIndex].scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    } else {
-      console.warn(
-        "No matching heading found for text:",
-        headingText,
-        "at occurrence",
-        occurrenceIndex
-      );
-    }
-  };
+  
 
   // Recursive component to render the hierarchy with clickable headings.
-  const renderHierarchy = (nodes) => {
+  const renderHierarchy = (nodes: any[]) => {
     return (
       <ul className="ml-4">
-        {nodes.map((node, index) => (
+        {nodes.map((node: { id: any; text: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; occurrenceIndex: any; children: string | any[]; }, index: any) => (
           <li key={`${node.id}-${index}`} className="my-1">
             <button
               className={`text-left hover:underline ${
@@ -126,21 +45,20 @@ const NotionLikePageEditor = () => {
                   : "font-semibold"
               }`}
               onClick={() =>
-                scrollToHeadingByText(node.text, node.occurrenceIndex)
+                scrollToHeadingByText(node.text, node.occurrenceIndex,setActiveHeading)
               }
             >
               {node.text}
             </button>
-            {node.children &&
-              node.children.length > 0 &&
-              renderHierarchy(node.children)}
+            {node?.children &&
+              node?.children.length > 0 &&
+              renderHierarchy(node?.children)}
           </li>
         ))}
       </ul>
     );
   };
 
-  console.log("Hierarchy:", JSON.stringify(hierarchy, null, 2));
 
   useEffect(() => {
     if (data) {
@@ -168,7 +86,7 @@ const NotionLikePageEditor = () => {
 
   const handleContentChange = async (newValue: YooptaContentValue) => {
     setValue(newValue);
-    await saveEditorData(title, newValue);
+    await saveEditorData(newValue);
   };
 
   const saveEditorData = async (
