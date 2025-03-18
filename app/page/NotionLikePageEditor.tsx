@@ -12,6 +12,7 @@ import { MARKS } from "~/components/Editor/marks";
 import { plugins } from "~/components/Editor/plugin";
 import { TOOLS } from "~/components/Editor/tools";
 import { Input } from "~/components/ui/input";
+import { usePageContext } from "~/hooks/use-dashboard";
 import { loader } from "~/routes/content";
 
 const NotionLikePageEditor = () => {
@@ -26,6 +27,7 @@ const NotionLikePageEditor = () => {
   const [editorId, setEditorId] = useState<string>(generateId());
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
+
 
   const hierarchy = generateHeadingHierarchy(value);
 
@@ -80,8 +82,11 @@ const NotionLikePageEditor = () => {
     return () => clearTimeout(timeoutId);
   }, [value, title]);
 
+  const { updatePageTitle } = usePageContext();
+
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
+    updatePageTitle(id as string,e.target.value)
   };
 
   const handleContentChange = async (newValue: YooptaContentValue) => {

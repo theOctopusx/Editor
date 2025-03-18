@@ -23,10 +23,11 @@ import {
 import { Link, Outlet, useFetcher, useLoaderData, useParams } from "@remix-run/react"
 import { json, LoaderFunction } from "@remix-run/node"
 import { EditorContent } from "~/module/editor/model"
+import { PageProvider, usePageContext } from "~/hooks/use-dashboard"
 
 // Define the Page type
 interface Page {
-  id: string
+  _id: string
   title: string
   content: string
   emoji?: string
@@ -48,17 +49,8 @@ export const loader: LoaderFunction = async () => {
 
 export default function Dashboard() {
   const fetcher = useFetcher(); 
-  console.log(fetcher);
-  const { data: pages } = useLoaderData<typeof loader>();
-  // console.log(data);
-
-  // const [pages, setPages] = React.useState(data?.map((page: { _id: string; title: string }) => ({
-  //   id: page._id,
-  //   title: page.title,
-  //   emoji: "👋",
-  //   workspace: "Personal"
-  // })) || []);
-  console.log(pages);
+  const { data:pages } = useLoaderData<typeof loader>();
+  
 
   const [selectedPage, setSelectedPage] = React.useState<Page | null>(pages[0]);
 
@@ -93,6 +85,7 @@ export default function Dashboard() {
   ])
 
   return (
+    <PageProvider initialPages={pages}>
     <SidebarProvider>
       <div className="flex h-screen w-full">
         <NotionSidebar
@@ -132,6 +125,7 @@ export default function Dashboard() {
         </SidebarInset>
       </div>
     </SidebarProvider>
+    </PageProvider>
   )
 }
 
@@ -232,9 +226,9 @@ interface WorkspaceGroupProps {
   onSelectPage: (page: Page) => void
 }
 
-function WorkspaceGroup({ workspace, pages}: WorkspaceGroupProps) {
+function WorkspaceGroup({ workspace }: WorkspaceGroupProps) {
   const {id} = useParams()
-  console.log("pages", pages);
+  const {pages} = usePageContext() 
   return (
     <SidebarGroup>
       <Collapsible defaultOpen className="group/collapsible">
@@ -267,14 +261,6 @@ function WorkspaceGroup({ workspace, pages}: WorkspaceGroupProps) {
                   </SidebarMenuAction>
                 </SidebarMenuItem>
               ))}
-              {/* <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <button className="w-full text-muted-foreground">
-                    <Plus className="h-4 w-4" />
-                    <span>Add a page</span>
-                  </button>
-                </SidebarMenuButton>
-              </SidebarMenuItem> */}
             </SidebarMenu>
           </SidebarGroupContent>
         </CollapsibleContent>
