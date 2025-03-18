@@ -25,10 +25,10 @@ const NotionLikePageEditor = () => {
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
 
   // Extract blocks from the editor content state.
-  const blocks = Object.values(value);
+  const blocks = value ? Object.values(value) : [];
 
   // Sort blocks based on the `order` property in meta
-  blocks.sort((a, b) => a.meta.order - b.meta.order);
+  blocks?.sort((a, b) => a.meta.order - b.meta.order);
 
   // Utility function to extract text from a block's value array
   const extractText = (block) => {
@@ -160,7 +160,7 @@ const NotionLikePageEditor = () => {
       setValue(data.content);
       setTitle(data.title);
     }
-  }, [id, data]);
+  }, [id, data.content,data.title]);
 
   useEffect(() => {
     if (debouncedTitle && debouncedTitle !== data?.title) {
@@ -200,26 +200,28 @@ const NotionLikePageEditor = () => {
   };
 
   return (
-    <div className="flex md:py-[100px] px-[20px] pt-[80px] pb-[40px]">
+    <div className="flex gap-x-10 md:py-[100px] w-full px-[20px] pt-[80px] pb-[40px]">
       {/* Sidebar Summary */}
-      <aside className="w-1/4 p-4 border-r">
+      <aside className="w-1/4 p-4 relative">
+        <div className="sticky top-0">
         <h2 className="text-xl font-bold mb-4">Document Summary</h2>
         {hierarchy.length > 0 ? (
           renderHierarchy(hierarchy)
         ) : (
           <p className="text-sm text-gray-500">No headings available.</p>
         )}
+        </div>
       </aside>
 
       {/* Editor Area */}
-      <div className="flex-1 pl-4" ref={selectionRef}>
+      <div className="flex-1 pl-4 border" ref={selectionRef}>
+        {data ? (<>
         <Input
           value={title}
           onChange={handleTitleChange}
           className="border-none text-3xl font-bold px-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           placeholder="Untitled"
         />
-        {data ? (
           <YooptaEditor
             key={editorId}
             width={672}
@@ -231,6 +233,7 @@ const NotionLikePageEditor = () => {
             value={value}
             onChange={handleContentChange}
           />
+          </>
         ) : (
           <p>Loading...</p>
         )}

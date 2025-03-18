@@ -124,14 +124,10 @@ export default function Dashboard() {
           </header>
           <main className="flex-1 overflow-auto p-4 sm:p-6">
            {/* // {selectedPage ? ( */}
-              <div className="mx-auto max-w-4xl">
+              <div className="mx-auto">
                 <Outlet/>
               </div>
-            {/* // ) : (
-            //   <div className="flex h-full items-center justify-center">
-            //     <p className="text-muted-foreground">Select a page or create a new one</p>
-            //   </div>
-            // )} */}
+
           </main>
         </SidebarInset>
       </div>
