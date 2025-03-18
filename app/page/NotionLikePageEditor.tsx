@@ -22,6 +22,8 @@ const NotionLikePageEditor = () => {
   const [value, setValue] = useState<YooptaContentValue>(data?.content || {});
   const [editorId, setEditorId] = useState<string>(generateId());
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  // // State for tracking the currently visible heading.
+  const [activeHeading, setActiveHeading] = useState<string | null>(null);
 
   // Extract blocks from the editor content state.
   const blocks = Object.values(value);
@@ -36,18 +38,17 @@ const NotionLikePageEditor = () => {
       .join(" ");
   };
 
-  // Build the hierarchy for headings
+  // Build the hierarchy for headings and include the block id
   const hierarchy = [];
   let currentHeadingOne = null;
   let currentHeadingTwo = null;
 
   blocks.forEach((block) => {
-    // Process only heading blocks
     if (block.type.startsWith("Heading")) {
-      const headingText = extractText(block);
       const node = {
+        id: block.id, // include the block id
         type: block.type,
-        text: headingText,
+        text: extractText(block),
         children: [],
       };
 
@@ -74,13 +75,45 @@ const NotionLikePageEditor = () => {
     }
   });
 
-  // Recursive component to render the hierarchy
+  // Scroll to a block by its id when clicking on the summary.
+  // Function to scroll to a heading element by matching its text.
+  // It queries for all headings using the known CSS selectors, then finds the one whose text matches.
+  const scrollToHeadingByText = (headingText) => {
+    // Query all heading elements using the known class selectors.
+    const selectors =
+      ".yoopta-heading-one, .yoopta-heading-two, .yoopta-heading-three";
+    const headingElements = Array.from(document.querySelectorAll(selectors));
+
+    // Find the element whose text matches the provided heading text.
+    const matchingElement = headingElements.find((el) => {
+      return el.innerText.trim() === headingText.trim();
+    });
+
+    if (matchingElement) {
+      setActiveHeading(headingText);
+      matchingElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      console.warn("No matching heading found for text:", headingText);
+    }
+  }
+
+  // Recursive component to render the hierarchy with clickable headings.
   const renderHierarchy = (nodes) => {
     return (
       <ul className="ml-4">
         {nodes.map((node, index) => (
-          <li key={`${node.text}-${index}`} className="my-1">
-            <span className="font-semibold">{node.text}</span>
+          <li key={`${node.id}-${index}`} className="my-1">
+            <button
+              className={`text-left hover:underline ${
+                activeHeading === node.text
+                  ? "font-bold text-blue-600"
+                  : "font-semibold"
+              }`}
+              onClick={() => scrollToHeadingByText(node.text)}
+            >
+              {node.text}
+            </button>
+
             {node.children &&
               node.children.length > 0 &&
               renderHierarchy(node.children)}
