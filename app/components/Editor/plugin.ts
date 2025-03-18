@@ -16,63 +16,39 @@ import { uploadToCloudinary } from '~/utils/cloudinary';
 
 
 export const plugins = [
-    Paragraph,
-    Table,
-    // CarouselPlugin,
-    Divider.extend({
-      elementProps: {
-        divider: (props) => ({
-          ...props,
-          color: '#007aff',
-        }),
-      },
-    }),
-    Accordion,
-    HeadingOne,
-    HeadingTwo,
-    HeadingThree,
-    Blockquote,
-    Callout,
-    NumberedList,
-    BulletedList,
-    TodoList,
-    Code,
-    Link,
-    Embed,
-    Image.extend({
-      options: {
-         async onUpload (file) : Promise<ImageUploadResponse> {
-          if (!file) {
-            console.error("No file received");
-            return file
-          }
-    
-          console.log("Uploading file:", file); // Check if file is received
-    
-          try {
-            const data = await uploadToCloudinary(file, 'image');
-            console.log("Upload response:", data); // Check response
-    
-            return {
-              src: data.secure_url,
-              alt: 'cloudinary',
-              sizes: {
-                width: data.width,
-                height: data.height,
-              },
-            };
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } catch (error:any) {
-            console.error("Image upload failed:", error); // Log upload error
-            return error?.message;
-          }
-        },
-      },
-    }),
-    Video.extend({
-      options: {
-        onUpload: async (file) => {
-          const data = await uploadToCloudinary(file, 'video');
+  Paragraph,
+  HeadingOne,
+  HeadingTwo,
+  HeadingThree,
+  BulletedList,
+  NumberedList,
+  TodoList,
+  Accordion,
+  Divider.extend({
+    elementProps: {
+      divider: (props) => ({
+        ...props,
+        color: '#007aff',
+      }),
+    },
+  }),
+  Callout,
+  Blockquote,
+  Table,
+  Image.extend({
+    options: {
+      async onUpload(file): Promise<ImageUploadResponse> {
+        if (!file) {
+          console.error("No file received");
+          return file
+        }
+
+        console.log("Uploading file:", file); // Check if file is received
+
+        try {
+          const data = await uploadToCloudinary(file, 'image');
+          console.log("Upload response:", data); // Check response
+
           return {
             src: data.secure_url,
             alt: 'cloudinary',
@@ -81,19 +57,42 @@ export const plugins = [
               height: data.height,
             },
           };
-        },
-        onUploadPoster: async (file) => {
-          const image = await uploadToCloudinary(file, 'image');
-          return image.secure_url;
-        },
+        } catch (error) {
+          console.error("Image upload failed:", error); // Log upload error
+          return null;
+        }
       },
-    }),
-    File.extend({
-      options: {
-        onUpload: async (file) => {
-          const response = await uploadToCloudinary(file, 'auto');
-          return { src: response.secure_url, format: response.format, name: response.name, size: response.bytes };
-        },
+    },
+  }),
+  Video.extend({
+    options: {
+      onUpload: async (file) => {
+        const data = await uploadToCloudinary(file, 'video');
+        return {
+          src: data.secure_url,
+          alt: 'cloudinary',
+          sizes: {
+            width: data.width,
+            height: data.height,
+          },
+        };
       },
-    }),
+      onUploadPoster: async (file) => {
+        const image = await uploadToCloudinary(file, 'image');
+        return image.secure_url;
+      },
+    },
+  }),
+  File.extend({
+    options: {
+      onUpload: async (file) => {
+        const response = await uploadToCloudinary(file, 'auto');
+        return { src: response.secure_url, format: response.format, name: response.name, size: response.bytes };
+      },
+    },
+  }),
+  Embed,
+  Code,
+  Link,
+  // ButtonPlugin,
   ];
