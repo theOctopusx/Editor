@@ -1,5 +1,7 @@
 import { Elements, PluginElementRenderProps, useYooptaEditor } from '@yoopta/editor';
 import { Trash } from 'lucide-react';
+import { Card, CardContent } from '~/components/ui/card';
+import { CarouselItem as CarouselRootItem } from '~/components/ui/carousel';
 
 const CarouselItem = ({ element, blockId, attributes, children }: PluginElementRenderProps) => {
   const editor = useYooptaEditor();

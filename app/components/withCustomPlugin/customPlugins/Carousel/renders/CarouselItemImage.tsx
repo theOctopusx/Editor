@@ -1,6 +1,7 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import { Elements, PluginElementRenderProps, useYooptaEditor, useYooptaReadOnly } from '@yoopta/editor';
-import { ImageIcon, DeleteIcon, Delete, Trash2 } from 'lucide-react';
-import { ChangeEvent, MouseEvent } from 'react';
+import { ImageIcon,Trash2 } from 'lucide-react';
+import { ChangeEvent } from 'react';
 
 const CarouselItemImage = ({ element, children, attributes, blockId }: PluginElementRenderProps) => {
   const editor = useYooptaEditor();
@@ -49,7 +50,7 @@ const CarouselItemImage = ({ element, children, attributes, blockId }: PluginEle
           htmlFor={`${element.id}-uploader`}
           className="aspect-square w-full rounded-md object-cover cursor-pointer relative"
           onClick={(e) => e.stopPropagation()}
-        >
+          >
           <input
             id={`${element.id}-uploader`}
             onChange={onUploadFile}

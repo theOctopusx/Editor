@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { Elements, UI, YooEditor, YooptaBlockData } from '@yoopta/editor';
 import { Lollipop, FlipVertical, FlipHorizontal } from 'lucide-react';
 import { CarouselElementProps } from '../types';
@@ -11,8 +12,8 @@ type Props = {
 };
 
 const CarouselBlockOptions = ({ editor, block, props }: Props) => {
-  const orientation = props.orientation;
-  const loop = props.loop;
+  const orientation = props?.orientation;
+  const loop = props?.loop;
 
   const isHorizontal = orientation === 'horizontal';
   const isLoop = loop;

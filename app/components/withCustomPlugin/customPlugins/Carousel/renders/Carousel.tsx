@@ -1,6 +1,7 @@
-import { Elements, PluginElementRenderProps, useBlockData, useYooptaEditor, useYooptaReadOnly } from '@yoopta/editor';
+import { Elements, PluginElementRenderProps, useBlockData, useYooptaEditor } from '@yoopta/editor';
 import { PlusCircle } from 'lucide-react';
 import { CarouselBlockOptions } from '../components/CarouselBlockOptions';
+import { CarouselContent, CarouselNext, CarouselPrevious, Carousel as CarouselRoot } from '~/components/ui/carousel';
 
 const Carousel = ({ children, element, blockId, attributes }: PluginElementRenderProps) => {
   const editor = useYooptaEditor();
