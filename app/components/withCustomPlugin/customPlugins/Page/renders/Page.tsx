@@ -13,13 +13,14 @@ const PageRenderElement = ({
   });
 
   useEffect(() => {
-    if (!pageData.id) {
+    // Only create a new page if it hasn't been created yet
+    if (!pageData.id && !fetcher.data) {
       fetcher.submit(
         { title: "Untitled Page", parentId: element.props.parentId },
         { method: "post", action: "/api/new-page" }
       );
     }
-  }, []);
+  }, [pageData.id, fetcher.data]); // Ensure this effect runs only when the pageData.id is not available
 
   useEffect(() => {
     if (fetcher.data) {
