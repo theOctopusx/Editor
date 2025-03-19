@@ -1,22 +1,24 @@
-import { YooptaPlugin } from '@yoopta/editor';
-import { SeparatorHorizontal } from 'lucide-react';
-import { PageRenderElement } from './renders/Page';
+import { YooptaPlugin } from "@yoopta/editor";
+import { SeparatorHorizontal } from "lucide-react";
+import { PageRenderElement } from "./renders/Page";
 
 const PagePlugin = new YooptaPlugin({
-  type: 'Button',
+  type: "Button",
   elements: {
-    divider: {
+    page: {
       render: PageRenderElement,
       props: {
         nodeType: 'void',
+        pageId: null,
+        title: 'New Page',
       },
     },
   },
   options: {
-    shortcuts: ['<--', '<---'],
+    shortcuts: ["<--", "<---"],
     display: {
-      title: 'New Page',
-      description: 'Separate',
+      title: "New Page",
+      description: "Separate",
       icon: <SeparatorHorizontal />,
     },
   },
