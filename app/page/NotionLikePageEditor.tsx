@@ -92,7 +92,7 @@ const NotionLikePageEditor = () => {
 
   const handleContentChange = async (newValue: YooptaContentValue) => {
     setValue(newValue);
-    // await saveEditorData(newValue);
+    await saveEditorData(newValue);
   };
 
   const saveEditorData = async (
