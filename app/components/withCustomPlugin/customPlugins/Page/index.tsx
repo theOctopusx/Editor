@@ -7,6 +7,7 @@ const PagePlugin = new YooptaPlugin({
   elements: {
     page: {
       render: PageRenderElement,
+      asRoot:true,
       props: {
         title: "New Test Page",
         pageId: null,

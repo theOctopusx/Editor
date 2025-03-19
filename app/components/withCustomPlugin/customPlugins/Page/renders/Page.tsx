@@ -1,16 +1,17 @@
-import { useEffect } from "react";
-import { PluginElementRenderProps, useYooptaEditor } from "@yoopta/editor";
-import { Transforms } from "slate";
+import { useEffect, useState } from "react";
+import { Elements, PluginElementRenderProps, useYooptaEditor } from "@yoopta/editor";
 import { Link, useFetcher } from "@remix-run/react";
 
 const PageRenderElement = ({
   element,
   attributes,
+  blockId
 }: PluginElementRenderProps) => {
   const fetcher = useFetcher();
   const editor = useYooptaEditor();
+  const [pageId,setPageId] = useState();
   console.log("PageRenderElement", element);
-  console.log("PageRenderEditor", editor.children);
+  // console.log("PageRenderEditor", editor.children);
   // console.log("PageRenderEditor", editor);
 
   // Listen for API responses via fetcher.
@@ -22,21 +23,31 @@ const PageRenderElement = ({
         pageId: fetcher.data.id, // Update the pageId with the new ID.
         title: fetcher.data.title, // Update the title with the new title.
       };
+      setPageId(fetcher?.data?.id)
+      // console.log(newProps);
+      const elementPath = Elements.getElementPath(editor, blockId, element);
+
+      Elements.updateElement(
+              editor,
+              blockId,
+              {type:'page',props: { ...element.props,pageId }},
+              { path: elementPath },
+        );
 
       // Update the element with the new props.
-      Transforms.setNodes(editor, { props: newProps }, { at: element.path });
+      // Transforms.setNodes(editor, { props: newProps }, { at: element.path });
     }
-  }, [fetcher.data, editor, element]);
-
+  }, [fetcher.data]);
+  console.log(pageId,'Page Id');
   return (
     <div
       {...attributes}
       className="w-full flex relative items-center h-[20px] my-1"
       contentEditable={false}
     >
-      {element.props.pageId ? (
+      {pageId ? (
         <Link
-          to={`/dashboard/content/${element.props.pageId}`}
+          to={`/dashboard/content/${pageId}`}
           className="text-blue-500 hover:underline px-3 py-2 border-2 rounded-sm"
         >
           {element.props.title}
