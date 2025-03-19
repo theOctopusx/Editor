@@ -3,22 +3,22 @@ import { SeparatorHorizontal } from "lucide-react";
 import { PageRenderElement } from "./renders/Page";
 
 const PagePlugin = new YooptaPlugin({
-  type: "Button",
+  type: "Page",
   elements: {
     page: {
       render: PageRenderElement,
       props: {
-        nodeType: 'void',
+        title: "New Page",
         pageId: null,
-        title: 'New Page',
+        nodeType: "void",
       },
     },
   },
   options: {
-    shortcuts: ["<--", "<---"],
+    shortcuts: ["/page"],
     display: {
       title: "New Page",
-      description: "Separate",
+      description: "Insert a new page block",
       icon: <SeparatorHorizontal />,
     },
   },
