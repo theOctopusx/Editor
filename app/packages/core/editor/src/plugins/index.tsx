@@ -1,1 +1,0 @@
-export { YooptaPlugin } from './createYooptaPlugin';
