@@ -9,7 +9,7 @@ NC='\033[0m' # No Color
 
 # Define variables
 PROJECT_DIR=~/Editor
-SSH_KEY=~/.ssh/editor_pipeline
+SSH_KEY=~/.ssh/editor
 PM2_APP_NAME=editor
 DEPLOY_URL="https://editor.monsterstudio.co"
 LOG_FILE="$PROJECT_DIR/deploy_$(date +%Y%m%d_%H%M%S).log"
