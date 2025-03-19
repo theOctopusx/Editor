@@ -27,6 +27,16 @@ import {
 import { Editor, Element, NodeEntry, Range, Transforms } from 'slate';
 import { ToolbarRenderProps } from './types';
 import { buildActionMenuRenderProps } from './utils';
+import RedoSvg from './icons/RedoSvg';
+import UndoSvg from './icons/UndoSvg';
+import BoldSvg from './icons/BoldSvg';
+import ItalicSvg from './icons/ItalicSvg';
+import UnderlineSvg from './icons/UnderlineSvg';
+import StrikeSvg from './icons/StrikeSvg';
+import CodeSvg from './icons/CodeSvg';
+import TextAlignSvg from './icons/TextAlignSvg';
+import ColorSvg from './icons/ColorSvg';
+import LinkSvg from './icons/LinkSvg';
 
 const { Overlay, Portal } = UI;
 
@@ -97,7 +107,7 @@ const DefaultToolbarRender = ({ activeBlock, editor, toggleHoldToolbar }: Toolba
   });
 
   const getItemStyle = (type) => ({
-    backgroundColor: editor.formats[type]?.isActive() ? '#1183ff' : undefined,
+    backgroundColor: editor.formats[type]?.isActive() ? '#f4f4f5' : undefined,
     color: editor.formats[type]?.isActive() ? '#fff' : undefined,
   });
 
@@ -236,132 +246,134 @@ const DefaultToolbarRender = ({ activeBlock, editor, toggleHoldToolbar }: Toolba
   const actionMenuRenderProps = buildActionMenuRenderProps({ editor, onClose: onCloseActionMenu, view: 'small' });
 
   return (
-    <Toolbar.Root className="bg-white flex z-50 p-[5px] rounded-md shadow-md border border-solid border-[#e3e3e3]">
+    <Toolbar.Root className="bg-white flex z-50 p-[2px] border border-[#D4D6D9] shadow-toolbarShadow rounded-[6px]">
       <Toolbar.ToggleGroup className="flex items-center" type="single" aria-label="Block formatting">
         <Toolbar.ToggleItem
-          className="cursor-pointer bg-transparent border-none h-full text-[16px] px-[10px] py-0 hover:bg-[#f4f4f5] rounded-md
-"
+          className="cursor-pointer bg-transparent border-none h-full px-[6px] py-0 hover:bg-[#f4f4f5] rounded-md flex items-center gap-1"
           value={blockLabel}
           aria-label={blockLabel}
           ref={actionMenuRefs.setReference}
           onClick={() => onChangeModal('actionMenu', !modals.actionMenu)}
           style={getModalTriggerStyle('actionMenu')}
         >
-          <span className="yoo-toolbar-mr-0">{blockLabel}</span>
+          <span className="text-xs text-[#666C79] font-medium">{blockLabel}</span>
+          {modals.actionMenu ? <ChevronUpIcon width={10} /> : <ChevronDownIcon width={10} />}
           {modals.actionMenu && !!ActionMenu && (
             <Portal id="yoo-toolbar-action-menu-list-portal">
-              <div style={actionMenuStyles} ref={actionMenuRefs.setFloating} onClick={(e) => e.stopPropagation()}>
+              <button style={actionMenuStyles} ref={actionMenuRefs.setFloating} onClick={(e) => e.stopPropagation()}>
                 <ActionMenu {...actionMenuRenderProps} />
-              </div>
+              </button>
             </Portal>
           )}
         </Toolbar.ToggleItem>
       </Toolbar.ToggleGroup>
-      <Toolbar.Separator className="bg-[#dbd8e0] mx-[6px] my-0 w-[1px]
-" />
-      <Toolbar.ToggleGroup className="flex items-center" type="single" aria-label="Block formatting">
-        <Toolbar.ToggleItem
-          className="cursor-pointer bg-transparent border-none h-full text-[16px] px-[10px] py-0 hover:bg-[#f4f4f5] rounded-md
-"
-          value="LinkTool"
-          aria-label="LinkTool"
-          ref={linkToolRefs.setReference}
+
+      <Toolbar.Separator className='bg-[#dbd8e0] w-[0.5px] h-[22px] my-auto mx-1' />
+
+      {/* this is for undo/redo */}
+      <div className="flex justify-center">
+        <button
+          type="button"
           onClick={() => {
-            onChangeModal('link', !modals.link);
-            toggleHoldToolbar?.(true);
+            editor.redo({ scroll: false });
           }}
-          style={getModalTriggerStyle('link')}
+          className="p-[6px] text-xs hover:bg-gray-200 hover:rounded-md disabled:opacity-50"
+          disabled={editor.historyStack.redos.length === 0}
         >
-          <span className="yoo-toolbar-mr-0">Link</span>
-          {modals.link && !!LinkTool && (
-            <Portal id="yoo-link-tool-portal">
-              <Overlay lockScroll className="z-[100]" onClick={onClickLinkOverlay}>
-                <div style={linkToolStyles} ref={linkToolRefs.setFloating}>
-                  <LinkTool link={linkValues} onSave={onUpdateLink} onDelete={onDeleteLink} />
-                </div>
-              </Overlay>
-            </Portal>
-          )}
-        </Toolbar.ToggleItem>
-      </Toolbar.ToggleGroup>
-      <Toolbar.Separator className="bg-[#dbd8e0] mx-[6px] my-0 w-[1px]
-" />
+          <RedoSvg />
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            editor.undo({ scroll: false });
+          }}
+          className="p-[6px] text-xs hover:bg-gray-200 hover:rounded-md disabled:opacity-50"
+          disabled={editor.historyStack.undos.length === 0}
+        >
+          <UndoSvg />
+        </button>
+      </div>
+
+      <Toolbar.Separator className='bg-[#dbd8e0] w-[0.5px] h-[22px] my-auto mx-1' />
+
       <Toolbar.ToggleGroup className="flex items-center" type="multiple" aria-label="Text formatting">
         {editor.formats.bold && (
           <Toolbar.ToggleItem
-            className="bg-transparent border-none ml-[2px] h-[32px] hover:bg-[#f4f4f5] rounded-md cursor-pointer inline-flex px-[5px] py-0 items-center justify-center
+            className="bg-transparent border-none ml-[2px] h-[28px] hover:bg-[#f4f4f5] rounded-md cursor-pointer inline-flex px-[6px] py-0 items-center justify-center
 "
             value="bold"
             aria-label="Bold"
             style={getItemStyle('bold')}
             onClick={() => onToggleMark('bold')}
           >
-            <FontBoldIcon width={20} height={20} />
+            <BoldSvg />
           </Toolbar.ToggleItem>
         )}
         {editor.formats.italic && (
           <Toolbar.ToggleItem
-            className=" bg-transparent border-none ml-[2px] h-[32px] hover:bg-[#f4f4f5] rounded-md cursor-pointer inline-flex px-[5px] py-0 items-center justify-center
+            className=" bg-transparent border-none ml-[2px] h-[28px] hover:bg-[#f4f4f5] rounded-md cursor-pointer inline-flex px-[6px] py-0 items-center justify-center
 "
             value="italic"
             aria-label="Italic"
             style={getItemStyle('italic')}
             onClick={() => onToggleMark('italic')}
           >
-            <FontItalicIcon width={20} height={20} />
+            <ItalicSvg />
           </Toolbar.ToggleItem>
         )}
         {editor.formats.underline && (
           <Toolbar.ToggleItem
-            className=" bg-transparent border-none ml-[2px] h-[32px] hover:bg-[#f4f4f5] rounded-md cursor-pointer inline-flex px-[5px] py-0 items-center justify-center
+            className=" bg-transparent border-none ml-[2px] h-[28px] hover:bg-[#f4f4f5] rounded-md cursor-pointer inline-flex px-[6px] py-0 items-center justify-center
 "
             value="underline"
             aria-label="Underline"
             style={getItemStyle('underline')}
             onClick={() => onToggleMark('underline')}
           >
-            <UnderlineIcon width={20} height={20} />
+            <UnderlineSvg />
           </Toolbar.ToggleItem>
         )}
 
         {editor.formats.strike && (
           <Toolbar.ToggleItem
-            className=" bg-transparent border-none ml-[2px] h-[32px] hover:bg-[#f4f4f5] rounded-md cursor-pointer inline-flex px-[5px] py-0 items-center justify-center
+            className="bg-transparent border-none ml-[2px] h-[28px] hover:bg-[#f4f4f5] rounded-md cursor-pointer inline-flex px-[6px] py-0 items-center justify-center
 "
             value="strike"
             aria-label="Strike"
             style={getItemStyle('strike')}
             onClick={() => onToggleMark('strike')}
           >
-            <StrikethroughIcon width={20} height={20} />
+            <StrikeSvg />
           </Toolbar.ToggleItem>
         )}
         {editor.formats.code && (
           <Toolbar.ToggleItem
-            className=" bg-transparent border-none ml-[2px] h-[32px] hover:bg-[#f4f4f5] rounded-md cursor-pointer inline-flex px-[5px] py-0 items-center justify-center
+            className="bg-transparent border-none ml-[2px] h-[28px] hover:bg-[#f4f4f5] rounded-md cursor-pointer inline-flex px-[6px] py-0 items-center justify-center
 "
             value="code"
             aria-label="Code"
             style={getItemStyle('code')}
             onClick={() => onToggleMark('code')}
           >
-            <CodeIcon width={20} height={20} />
+            <CodeSvg />
           </Toolbar.ToggleItem>
         )}
       </Toolbar.ToggleGroup>
-      <Toolbar.Separator className="bg-[#dbd8e0] mx-[6px] my-0 w-[1px]
-" />
+
+      <Toolbar.Separator className='bg-[#dbd8e0] w-[0.5px] h-[22px] my-auto mx-1' />
+
       <Toolbar.ToggleGroup className="flex items-center" type="multiple" aria-label="Text formatting">
         <Toolbar.ToggleItem
-          className=" bg-transparent border-none ml-[2px] h-[32px] hover:bg-[#f4f4f5] rounded-md cursor-pointer inline-flex px-[5px] py-0 items-center justify-center
-"
+          className="bg-transparent border-none ml-[2px] h-[28px] hover:bg-[#f4f4f5] rounded-md cursor-pointer inline-flex px-[6px] py-0 items-center justify-center"
           value="align"
           aria-label="Alignment"
           style={getItemStyle('align')}
           onClick={onToggleAlign}
         >
-          <AlignIcon width={20} height={20} />
+          <TextAlignSvg />
         </Toolbar.ToggleItem>
+
+        {/* This is for color picker */}
         {editor.formats.highlight && (
           <>
             {modals.highlight && (
@@ -375,19 +387,42 @@ const DefaultToolbarRender = ({ activeBlock, editor, toggleHoldToolbar }: Toolba
             )}
 
             <Toolbar.ToggleItem
-              className="bg-transparent border-none ml-[2px] h-[32px] hover:bg-[#f4f4f5] rounded-md cursor-pointer inline-flex px-[5px] py-0 items-center justify-center
-"
+              className="bg-transparent border-none ml-[2px] h-[28px] hover:bg-[#f4f4f5] rounded-md cursor-pointer inline-flex px-[6px] py-0 items-center justify-center gap-1"
               value="highlight"
               aria-label="Highlight"
               style={getHighlightTriggerStyle()}
               ref={highlightPickerRefs.setReference}
               onClick={() => onChangeModal('highlight', !modals.highlight)}
             >
-              <span className="yoopta-toolbar-color-text">A</span>
+              <ColorSvg />
               {modals.highlight ? <ChevronUpIcon width={10} /> : <ChevronDownIcon width={10} />}
             </Toolbar.ToggleItem>
           </>
         )}
+        {/* This is for link tool */}
+        <Toolbar.ToggleItem
+          className="cursor-pointer bg-transparent border-none h-full px-[6px] py-0 hover:bg-[#f4f4f5] rounded-md
+"
+          value="LinkTool"
+          aria-label="LinkTool"
+          ref={linkToolRefs.setReference}
+          onClick={() => {
+            onChangeModal('link', !modals.link);
+            toggleHoldToolbar?.(true);
+          }}
+          style={getModalTriggerStyle('link')}
+        >
+          <LinkSvg />
+          {modals.link && !!LinkTool && (
+            <Portal id="yoo-link-tool-portal">
+              <Overlay lockScroll className="z-[100]" onClick={onClickLinkOverlay}>
+                <div style={linkToolStyles} ref={linkToolRefs.setFloating}>
+                  <LinkTool link={linkValues} onSave={onUpdateLink} onDelete={onDeleteLink} />
+                </div>
+              </Overlay>
+            </Portal>
+          )}
+        </Toolbar.ToggleItem>
       </Toolbar.ToggleGroup>
     </Toolbar.Root>
   );

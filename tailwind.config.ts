@@ -23,6 +23,9 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			boxShadow: {
+				toolbarShadow: '0px 9px 39px 0px rgba(85, 85, 85, 0.06), 0px 3.76px 16.293px 0px rgba(85, 85, 85, 0.04), 0px 2.01px 8.711px 0px rgba(85, 85, 85, 0.04), 0px 1.127px 4.883px 0px rgba(85, 85, 85, 0.03), 0px 0.599px 2.594px 0px rgba(85, 85, 85, 0.02), 0px 0.249px 1.079px 0px rgba(85, 85, 85, 0.02) !important',
+			},
 			colors: {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',

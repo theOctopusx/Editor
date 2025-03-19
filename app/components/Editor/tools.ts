@@ -3,7 +3,8 @@ import { ActionNotionMenuExample } from './NotionExample/ActionNotionMenuExample
 import ActionMenuList from '@yoopta/action-menu-list';
 import { NotionToolbar } from './NotionToolbar/NotionToolbar';
 import Toolbar from '@yoopta/toolbar';
-import { DefaultToolbarRender } from '~/components/Editor/toolbar/DefaultToolbarRender';
+import { DefaultToolbarRender } from './toolbar/DefaultToolbarRender';
+
 
 
 
