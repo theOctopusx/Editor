@@ -257,7 +257,7 @@ const DefaultToolbarRender = ({ activeBlock, editor, toggleHoldToolbar }: Toolba
           style={getModalTriggerStyle('actionMenu')}
         >
           <span className="text-xs text-[#666C79] font-medium">{blockLabel}</span>
-          {modals.actionMenu ? <ChevronUpIcon width={10} /> : <ChevronDownIcon width={10} />}
+          {modals.actionMenu ? <ChevronUpIcon width={10} color='#8C919A' /> : <ChevronDownIcon width={10} color='#8C919A' />}
           {modals.actionMenu && !!ActionMenu && (
             <Portal id="yoo-toolbar-action-menu-list-portal">
               <button style={actionMenuStyles} ref={actionMenuRefs.setFloating} onClick={(e) => e.stopPropagation()}>
@@ -395,7 +395,7 @@ const DefaultToolbarRender = ({ activeBlock, editor, toggleHoldToolbar }: Toolba
               onClick={() => onChangeModal('highlight', !modals.highlight)}
             >
               <ColorSvg />
-              {modals.highlight ? <ChevronUpIcon width={10} /> : <ChevronDownIcon width={10} />}
+              {modals.highlight ? <ChevronUpIcon width={10} color='#8C919A' /> : <ChevronDownIcon width={10} color='#8C919A' />}
             </Toolbar.ToggleItem>
           </>
         )}

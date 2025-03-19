@@ -1,26 +1,28 @@
 import { HexColorPicker } from 'react-colorful';
 import { CSSProperties, MouseEvent, useState } from 'react';
 import { YooEditor, UI } from '@yoopta/editor';
-import { PaletteIcon } from 'lucide-react';
+import { ChevronDownIcon, ChevronUpIcon, PaletteIcon } from 'lucide-react';
 import { useDebouncedCallback } from 'use-debounce';
 
 const { Portal } = UI;
 
 const COLOR_PRESETS = {
   text: [
-    { name: 'Default', value: 'black' },
-    { name: 'Gray', value: '#787774' },
-    { name: 'Brown', value: '#976D57' },
-    { name: 'Orange', value: '#CC772F' },
-    { name: 'Yellow', value: '#C29243' },
+    { name: 'Default', value: '#030303' },
+    { name: 'Gray', value: '#767572' },
+    { name: 'Brown', value: '#956C57' },
+    { name: 'Orange', value: '#C87630' },
+    { name: 'Yellow', value: '#C09144' },
     { name: 'Green', value: '#548064' },
-    { name: 'Blue', value: '#477DA5' },
-    { name: 'Purple', value: '#A48BBE' },
-    { name: 'Pink', value: '#B35588' },
-    { name: 'Red', value: '#C4554D' },
+    { name: 'Blue', value: '#477CA4' },
+    { name: 'Purple', value: '#A38BBD' },
+    { name: 'Pink', value: '#B15587' },
+    { name: 'Red', value: '#C3554D' },
+    { name: 'OliveGreen', value: '#929544' },
+    { name: 'CobaltBlue', value: '#275BAA' }
   ],
   background: [
-    { name: 'Default', value: 'unset' },
+    { name: 'Default', value: '#FFF' },
     { name: 'Gray', value: '#F1F1EF' },
     { name: 'Brown', value: '#F3EEEE' },
     { name: 'Orange', value: '#F8ECDF' },
@@ -28,8 +30,10 @@ const COLOR_PRESETS = {
     { name: 'Green', value: '#EEF3ED' },
     { name: 'Blue', value: '#E9F3F7' },
     { name: 'Purple', value: '#F6F3F8' },
-    { name: 'Pink', value: '#F9F2F5' },
-    { name: 'Red', value: '#FAECEC' },
+    { name: 'Pink', value: '#F6F3F8' },
+    { name: 'Red', value: '#F9F2F5' },
+    { name: 'RoseMist', value: '#FAECEC' },
+    { name: 'PowderBlue', value: '#EAF1FA' }
   ],
 };
 
@@ -48,7 +52,7 @@ const COLOR_PICKER_STYLES = {
 
 const HighlightColor = ({ editor, refs, floatingStyles, highlightColors = {} }: Props) => {
   const [tab, setTab] = useState<'text' | 'background'>('text');
-  const [showColorPicker, setShowColorPicker] = useState(true);
+  const [showColorPicker, setShowColorPicker] = useState(false);
   const [localColor, setLocalColor] = useState<string | null>(null);
 
   const debouncedUpdateColor = useDebouncedCallback((type: 'color' | 'backgroundColor', color: string) => {
@@ -85,48 +89,49 @@ const HighlightColor = ({ editor, refs, floatingStyles, highlightColors = {} }: 
       position: 'relative' as const,
     };
   };
-
   return (
     <Portal id="yoo-highlight-color-portal">
-      <div
+      <button
+        type="button"
         style={floatingStyles}
         ref={refs.setFloating}
         onClick={(e: MouseEvent) => e.stopPropagation()}
-        className="yoo-toolbar-z-50"
+        className="z-50 w-[168px] top-0 left-0"
       >
-        <div className="yoo-toolbar-bg-[#FFFFFF] yoo-toolbar-p-2 yoo-toolbar-rounded-md yoo-toolbar-shadow-md yoo-toolbar-border yoo-toolbar-border-solid yoo-toolbar-border-[#e5e7eb]">
+        <div className="bg-[#FFFFFF] p-1 rounded-[7px] shadow-toolbarShadow border border-solid border-[#e5e7eb]">
           {/* Tabs */}
-          <div className="yoo-toolbar-flex yoo-toolbar-space-x-2 yoo-toolbar-mb-3">
+          <div className="p-[2px] bg-[#EFEFF1] rounded-[6px] mb-[10px] flex gap-1 relative overflow-hidden">
+            {/* Animated background that moves with the selected tab */}
+            <div
+              className={`absolute rounded-[4px] bg-[#FFF] shadow-[0px_1.5px_3px_0px_rgba(0,0,0,0.15)] transition-transform duration-300 ease-in-out top-[2px] bottom-[2px] w-1/2
+          ${tab === "text" ? "translate-x-0" : "translate-x-[calc(100%-4px)]"}`}
+            />
+
+            {/* Text Tab Button */}
             <button
-              className={`yoo-toolbar-px-3 yoo-toolbar-py-1 yoo-toolbar-text-sm yoo-toolbar-rounded ${
-                tab === 'text'
-                  ? 'yoo-toolbar-bg-blue-50 yoo-toolbar-text-blue-600'
-                  : 'yoo-toolbar-text-gray-600 hover:yoo-toolbar-bg-gray-50'
-              }`}
-              onClick={() => setTab('text')}
+              className="px-3 py-1 text-xs rounded-[4px] relative z-10 flex-1 text-[#666C79]"
+              onClick={() => setTab("text")}
             >
               Text
             </button>
+
+            {/* Background Tab Button */}
             <button
-              className={`yoo-toolbar-px-3 yoo-toolbar-py-1 yoo-toolbar-text-sm yoo-toolbar-rounded ${
-                tab === 'background'
-                  ? 'yoo-toolbar-bg-blue-50 yoo-toolbar-text-blue-600'
-                  : 'yoo-toolbar-text-gray-600 hover:yoo-toolbar-bg-gray-50'
-              }`}
-              onClick={() => setTab('background')}
+              className="px-3 py-1 text-xs rounded-[4px] relative z-10 flex-1 text-[#666C79]"
+              onClick={() => setTab("background")}
             >
-              Background
+              BG
             </button>
           </div>
 
           {/* Presets Grid */}
-          <div className="yoo-toolbar-grid yoo-toolbar-justify-items-center yoo-toolbar-grid-cols-5 yoo-toolbar-gap-1 yoo-toolbar-mb-3">
+          <div className="grid justify-items-center grid-cols-6 gap-1 mb-3">
             {COLOR_PRESETS[tab].map(({ name, value }) => (
               <button
                 key={name}
                 title={name}
                 type="button"
-                className="yoo-toolbar-w-6 yoo-toolbar-h-6 yoo-toolbar-rounded yoo-toolbar-transition-all hover:yoo-toolbar-scale-110"
+                className="w-6 h-6 rounded transition-all hover:scale-110"
                 style={getItemStyles(tab === 'text' ? 'color' : 'backgroundColor', value)}
                 onClick={() => handleColorChange(tab === 'text' ? 'color' : 'backgroundColor', value)}
               />
@@ -134,17 +139,17 @@ const HighlightColor = ({ editor, refs, floatingStyles, highlightColors = {} }: 
           </div>
 
           {/* Custom Color Section */}
-          <div className="yoo-toolbar-border-t yoo-toolbar-pt-2">
+          <div className="border-t pt-2 w-full">
             <button
-              className="yoo-toolbar-text-sm yoo-toolbar-text-gray-600 hover:yoo-toolbar-text-gray-900 yoo-toolbar-flex yoo-toolbar-items-center"
+              className="text-xs text-[#666C79] flex items-center justify-between w-full"
               onClick={() => setShowColorPicker(!showColorPicker)}
             >
               Color Picker
-              <PaletteIcon className="yoo-toolbar-w-4 yoo-toolbar-h-4 yoo-toolbar-ml-1" />
+              {showColorPicker ? <ChevronUpIcon width={12} color='#8C919A' /> : <ChevronDownIcon width={12} color='#8C919A' />}
             </button>
 
             {showColorPicker && (
-              <div className="yoo-toolbar-mt-2">
+              <div className="mt-2">
                 <HexColorPicker
                   color={localColor || highlightColors[tab === 'text' ? 'color' : 'backgroundColor'] || '#000000'}
                   onChange={(color) => handleColorChange(tab === 'text' ? 'color' : 'backgroundColor', color, true)}
@@ -154,7 +159,7 @@ const HighlightColor = ({ editor, refs, floatingStyles, highlightColors = {} }: 
             )}
           </div>
         </div>
-      </div>
+      </button>
     </Portal>
   );
 };
