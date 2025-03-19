@@ -1,0 +1,35 @@
+name: Preview Editor CI/CD
+on:
+  workflow_dispatch: null
+jobs:
+  ci:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the project
+        run: npm run build
+  cd:
+    needs: ci
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: "${{ secrets.Preview_HOST }}"
+          username: "${{ secrets.Preview_USERNAME }}"
+          key: "${{ secrets.Preview_SSH_PRIVATE_KEY }}"
+          port: "${{ secrets.Preview_PORT }}"
+          script: ~/Editor/deploy_editor.sh
