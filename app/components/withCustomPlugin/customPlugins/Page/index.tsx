@@ -8,7 +8,7 @@ const PagePlugin = new YooptaPlugin({
     page: {
       render: PageRenderElement,
       props: {
-        title: "New Page",
+        title: "New Test Page",
         pageId: null,
         nodeType: "void",
       },
