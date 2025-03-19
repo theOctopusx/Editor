@@ -1,4 +1,4 @@
-name: Preview Editor CI/CD
+name: Preview Editor
 on:
   workflow_dispatch: null
 jobs:
@@ -10,15 +10,15 @@ jobs:
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install
 
       - name: Build the project
-        run: npm run build
+        run: pnpm build
   cd:
     needs: ci
     runs-on: ubuntu-22.04
