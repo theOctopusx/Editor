@@ -8,6 +8,7 @@ const PageRenderElement = ({
   blockId
 }: PluginElementRenderProps) => {
   const fetcher = useFetcher();
+  console.log(fetcher,'fetcther');
   const editor = useYooptaEditor();
   const [pageId,setPageId] = useState();
   console.log("PageRenderElement", element);
@@ -16,7 +17,7 @@ const PageRenderElement = ({
 
   // Listen for API responses via fetcher.
   useEffect(() => {
-    if (fetcher.data && fetcher.data.id) {
+    if (fetcher?.data?.id && fetcher?.data?.title) {
       // Update the element props with the new page ID and title.
       const newProps = {
         ...element.props,
@@ -30,7 +31,7 @@ const PageRenderElement = ({
       Elements.updateElement(
               editor,
               blockId,
-              {type:'page',props: { ...element.props,pageId }},
+              {type:'page',props: { ...element.props,pageId:fetcher?.data?.id }},
               { path: elementPath },
         );
 
@@ -54,7 +55,9 @@ const PageRenderElement = ({
         </Link>
       ) : (
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
             // Trigger the API call to create the page.
             // This submits the form data, including parentId if available.
             fetcher.submit(
@@ -64,6 +67,7 @@ const PageRenderElement = ({
               { method: "post", action: "/api/new-page" }
             );
           }}
+          type="button"
           className="text-blue-500 hover:underline px-3 py-2 border-2 rounded-sm"
         >
           {fetcher.state === "submitting"
