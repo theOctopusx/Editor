@@ -1,5 +1,4 @@
 import { YooptaPlugin } from "@yoopta/editor";
-import { SeparatorHorizontal } from "lucide-react";
 import { PageRenderElement } from "./renders/Page";
 import FileText from "~/components/Editor/NotionExample/icons/FileText";
 
