@@ -1,23 +1,27 @@
-import { YooptaPlugin } from '@yoopta/editor';
-import { SeparatorHorizontal } from 'lucide-react';
-import { PageRenderElement } from './renders/Page';
+import { YooptaPlugin } from "@yoopta/editor";
+import { SeparatorHorizontal } from "lucide-react";
+import { PageRenderElement } from "./renders/Page";
+import FileText from "~/components/Editor/NotionExample/icons/FileText";
 
 const PagePlugin = new YooptaPlugin({
-  type: 'Button',
+  type: "Page",
   elements: {
-    divider: {
+    page: {
       render: PageRenderElement,
+      asRoot:true,
       props: {
-        nodeType: 'void',
+        title: "New Test Page",
+        pageId: null,
+        nodeType: "void",
       },
     },
   },
   options: {
-    shortcuts: ['<--', '<---'],
+    shortcuts: ["/page"],
     display: {
-      title: 'New Page',
-      description: 'Separate',
-      icon: <SeparatorHorizontal />,
+      title: "Page",
+      description: "Insert a new page block",
+      icon: <FileText />,
     },
   },
 });
