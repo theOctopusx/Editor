@@ -29,7 +29,7 @@ const PageRenderElement = ({
   // Listen for API responses via fetcher.
   useEffect(() => {
     const handleFetcherData = async () => {
-      if (actionData?.id && actionData?.title) {
+      if (actionData?.id && actionData?.title && !element?.props?.pageId) {
         const elementPath = Elements.getElementPath(editor, blockId, element);
 
         Elements.updateElement(
@@ -60,9 +60,9 @@ const PageRenderElement = ({
       className="w-full flex relative items-center h-[20px] my-1"
       contentEditable={false}
     >
-      {actionData ? (
+      {element?.props?.pageId ? (
         <Link
-          to={`/dashboard/content/${actionData?.id}`}
+          to={`/dashboard/content/${element?.props?.pageId}`}
           className="text-blue-500 hover:underline px-3 py-2 border-2 rounded-sm"
         >
           {element.props.title}
