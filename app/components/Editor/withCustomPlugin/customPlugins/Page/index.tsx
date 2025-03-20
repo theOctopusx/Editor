@@ -1,6 +1,6 @@
 import { YooptaPlugin } from "@yoopta/editor";
 import { PageRenderElement } from "./renders/Page";
-import FileText from "~/components/Editor/NotionExample/icons/FileText";
+import FileText from "~/components/Editor/actionMenu/icons/FileText";
 
 const PagePlugin = new YooptaPlugin({
   type: "Page",

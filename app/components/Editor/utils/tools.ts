@@ -1,7 +1,7 @@
 import LinkTool, { DefaultLinkToolRender } from "@yoopta/link-tool";
 import ActionMenuList from "@yoopta/action-menu-list";
 import Toolbar from "@yoopta/toolbar";
-import { ActionNotionMenuExample } from "../NotionExample/ActionNotionMenuExample";
+import { ActionNotionMenuExample } from "../actionMenu/ActionNotionMenuExample";
 import { DefaultToolbarRender } from "../toolbar/DefaultToolbarRender";
 
 export const TOOLS = {

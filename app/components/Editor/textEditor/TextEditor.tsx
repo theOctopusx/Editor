@@ -14,18 +14,14 @@ import YooptaEditor, {
   import File from '@yoopta/file';
   import Accordion from '@yoopta/accordion';
   import { NumberedList, BulletedList, TodoList } from '@yoopta/lists';
-  import { Bold, Italic, CodeMark, Underline, Strike, Highlight } from '@yoopta/marks';
   import { HeadingOne, HeadingThree, HeadingTwo } from '@yoopta/headings';
   import Code from '@yoopta/code';
   import Table from '@yoopta/table';
   import Divider from '@yoopta/divider';
 
   import { useMemo, useRef, useState } from 'react';
-import { DefaultToolbarRender } from '../toolbar/DefaultToolbarRender';
-import { Toolbar } from '../toolbar/Toolbar';
-import LinkTool, { DefaultLinkToolRender } from '@yoopta/link-tool';
-import { ActionNotionMenuExample } from '../NotionExample/ActionNotionMenuExample';
-import ActionMenuList from '@yoopta/action-menu-list';
+import { TOOLS } from '../utils/tools';
+import { MARKS } from '../utils/marks';
   
   export const CLOUDINARY = {
     PRESET: "add you cloudinary preset",
@@ -145,23 +141,6 @@ import ActionMenuList from '@yoopta/action-menu-list';
       },
     }),
   ];
-  
-  const TOOLS = {
-    ActionMenu: {
-      render: ActionNotionMenuExample,
-      tool: ActionMenuList,
-    },
-    Toolbar: {
-      render: DefaultToolbarRender,
-      tool: Toolbar,
-    },
-    LinkTool: {
-      render: DefaultLinkToolRender,
-      tool: LinkTool,
-    },
-  };
-  
-  const MARKS = [Bold, Italic, CodeMark, Underline, Strike, Highlight];
   
   function TextEditor() {
     const [value, setValue] = useState();
