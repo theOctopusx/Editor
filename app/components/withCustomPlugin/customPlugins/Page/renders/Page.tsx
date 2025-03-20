@@ -13,7 +13,7 @@ const PageRenderElement = ({
 }: PluginElementRenderProps) => {
   const actionData = useActionData();
   const editor = useYooptaEditor();
-  console.log("PageRenderElement", element);
+  console.log("content_id", element.id,'block_id',blockId);
 
   // Listen for API responses via fetcher.
   useEffect(() => {
