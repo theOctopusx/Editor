@@ -17,9 +17,11 @@ import TableSvg from '../icons/TableSvg';
 import DividerSvg from '../icons/DividerSvg';
 // import Accordion from '@yoopta/accordion';
 import ToggleListSvg from '../icons/ToggleListSvg';
+import FileText from '../icons/FileText';
 
 export const ICONS_SRC = {
   Paragraph: TextSvg,
+  Page:FileText,
   Blockquote: BlockquoteSvg,
   Callout: CallOutSvg,
   Image: ImageSvg,

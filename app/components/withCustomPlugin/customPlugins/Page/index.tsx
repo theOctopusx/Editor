@@ -1,6 +1,7 @@
 import { YooptaPlugin } from "@yoopta/editor";
 import { SeparatorHorizontal } from "lucide-react";
 import { PageRenderElement } from "./renders/Page";
+import FileText from "~/components/Editor/NotionExample/icons/FileText";
 
 const PagePlugin = new YooptaPlugin({
   type: "Page",
@@ -18,9 +19,9 @@ const PagePlugin = new YooptaPlugin({
   options: {
     shortcuts: ["/page"],
     display: {
-      title: "New Page",
+      title: "Page",
       description: "Insert a new page block",
-      icon: <SeparatorHorizontal />,
+      icon: <FileText />,
     },
   },
 });
