@@ -14,7 +14,6 @@ export const TOOLS = {
     tool: ActionMenuList,
   },
   Toolbar: {
-    // render: NotionToolbar,
     render: DefaultToolbarRender,
     tool: Toolbar,
   },
