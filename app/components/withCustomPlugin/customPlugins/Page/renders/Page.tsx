@@ -1,30 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   Elements,
   PluginElementRenderProps,
   useYooptaEditor,
 } from "@yoopta/editor";
-import {
-  Form,
-  Link,
-  useActionData,
-  useFetcher,
-  useNavigate,
-} from "@remix-run/react";
+import { Form, Link, useActionData } from "@remix-run/react";
 
 const PageRenderElement = ({
   element,
   attributes,
   blockId,
 }: PluginElementRenderProps) => {
-  // const fetcher = useFetcher();
-  // console.log(fetcher, "fetcther");
   const actionData = useActionData();
   const editor = useYooptaEditor();
-  const navigate = useNavigate();
   console.log("PageRenderElement", element);
-  // console.log("PageRenderEditor", editor.children);
-  // console.log("PageRenderEditor", editor);
 
   // Listen for API responses via fetcher.
   useEffect(() => {
@@ -37,17 +26,14 @@ const PageRenderElement = ({
           blockId,
           {
             type: "page",
-            props: { ...element.props, pageId: actionData?.id },
+            props: {
+              ...element.props,
+              title: actionData?.title,
+              pageId: actionData?.id,
+            },
           },
           { path: elementPath }
         );
-
-        // * wait for a  second to allow the editor to update
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // if (element.props.pageId) {
-        //   navigate(`/dashboard/content/${actionData?.id}`, { replace: true });
-        // }
       }
     };
 
