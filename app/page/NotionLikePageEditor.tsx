@@ -8,9 +8,9 @@ import YooptaEditor, {
 import { JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useEffect, useMemo, useRef, useState } from "react";
 import { generateHeadingHierarchy } from "~/components/Editor/editorFunction/generateHeadingHierarchy";
 import { scrollToHeadingByText } from "~/components/Editor/editorFunction/scrollToHeadingByText";
-import { MARKS } from "~/components/Editor/marks";
-import { plugins } from "~/components/Editor/plugin";
-import { TOOLS } from "~/components/Editor/tools";
+import { MARKS } from "~/components/Editor/utils/marks";
+import { plugins } from "~/components/Editor/utils/plugin";
+import { TOOLS } from "~/components/Editor/utils/tools";
 import { Input } from "~/components/ui/input";
 import { usePageContext } from "~/hooks/use-dashboard";
 import { loader } from "~/routes/content";
@@ -24,6 +24,7 @@ const NotionLikePageEditor = () => {
 
   const [title, setTitle] = useState<string>(data?.title || "Untitled");
   const [value, setValue] = useState<YooptaContentValue>(data?.content || {});
+  console.log("value", value);
   const [editorId, setEditorId] = useState<string>(generateId());
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);

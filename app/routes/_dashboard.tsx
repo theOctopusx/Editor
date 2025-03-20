@@ -1,9 +1,20 @@
-import * as React from "react"
-import { ChevronDown, FilePlus, Home, MoreHorizontal, Search, Settings } from "lucide-react"
-import { nanoid } from "nanoid"
-import { Button } from "~/components/ui/button"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "~/components/ui/collapsible"
-import { Input } from "~/components/ui/input"
+import * as React from "react";
+import {
+  ChevronDown,
+  FilePlus,
+  Home,
+  MoreHorizontal,
+  Search,
+  Settings,
+} from "lucide-react";
+import { nanoid } from "nanoid";
+import { Button } from "~/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "~/components/ui/collapsible";
+import { Input } from "~/components/ui/input";
 import {
   Sidebar,
   SidebarContent,
@@ -19,131 +30,131 @@ import {
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
-} from "~/components/ui/sidebar"
-import { Link, Outlet, useFetcher, useLoaderData, useParams } from "@remix-run/react"
-import { json, LoaderFunction } from "@remix-run/node"
-import { EditorContent } from "~/module/editor/model"
-import { PageProvider, usePageContext } from "~/hooks/use-dashboard"
+} from "~/components/ui/sidebar";
+import {
+  Link,
+  Outlet,
+  useFetcher,
+  useLoaderData,
+  useParams,
+} from "@remix-run/react";
+import { json, LoaderFunction } from "@remix-run/node";
+import { EditorContent } from "~/module/editor/model";
+import { PageProvider, usePageContext } from "~/hooks/use-dashboard";
 
 // Define the Page type
 interface Page {
-  _id: string
-  title: string
-  content: string
-  emoji?: string
-  workspace?: string
+  _id: string;
+  title: string;
+  content: string;
+  emoji?: string;
+  workspace?: string;
 }
 
 export const loader: LoaderFunction = async () => {
-    try {
-      
-      // Fetch all documents (modify as needed)
-      const editorContents = await EditorContent.find();
-  
-      return json({ success: true, data: editorContents });
-    } catch (error) {
-      console.error("Error fetching editor content:", error);
-      return json({ success: false, error: "Failed to fetch data" }, { status: 500 });
-    }
-  };
+  try {
+    // Fetch all documents (modify as needed)
+    const editorContents = await EditorContent.find();
+
+    return json({ success: true, data: editorContents });
+  } catch (error) {
+    console.error("Error fetching editor content:", error);
+    return json(
+      { success: false, error: "Failed to fetch data" },
+      { status: 500 }
+    );
+  }
+};
 
 export default function Dashboard() {
-  const fetcher = useFetcher(); 
-  const { data:pages } = useLoaderData<typeof loader>();
-  
+  const fetcher = useFetcher();
+  const { data: pages } = useLoaderData<typeof loader>();
 
   const [selectedPage, setSelectedPage] = React.useState<Page | null>(pages[0]);
-
-  const createPage = async () => {
-    const newPage = { id: nanoid(), title: "Untitled", content: {}, workspace: "Personal" };
-
-    try {
-      await fetcher.submit(
-        { title: newPage.title, content: newPage.content },
-        { method: "POST", action: "/api/createPage" }
-      );
-
-      // 🔄 Refetch data after new page is added
-      fetcher.load(location.pathname);
-    } catch (error) {
-      console.error("Error creating page:", error);
-    }
-  };
 
   // 🔄 Update state when new data is fetched
   React.useEffect(() => {
     if (fetcher.data?.data) {
-      // setPages(data);
       setSelectedPage(fetcher.data.data[0] || null);
-
     }
   }, [fetcher.data]);
-   // State for workspaces
-   const [workspaces] = React.useState([
+  // State for workspaces
+  const [workspaces] = React.useState([
     { name: "Personal", emoji: "🏠" },
     // { name: "Work", emoji: "💼" },
-  ])
+  ]);
 
   return (
     <PageProvider initialPages={pages}>
-    <SidebarProvider>
-      <div className="flex h-screen w-full">
-        <NotionSidebar
-          pages={pages}
-          workspaces={workspaces}
-          selectedPage={selectedPage}
-          onSelectPage={setSelectedPage}
-          onCreatePage={createPage}
-        />
-        <SidebarInset>
-          <header className="sticky top-0 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
-            <SidebarTrigger />
-            <div className="flex flex-1 items-center justify-between">
-              <div className="flex items-center gap-2">
-                {selectedPage && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{selectedPage.emoji || "📄"}</span>
-                    <h1 className="text-lg font-medium">{selectedPage.title}</h1>
-                  </div>
-                )}
+      <SidebarProvider>
+        <div className="flex h-screen w-full">
+          <NotionSidebar
+            // pages={pages}
+            workspaces={workspaces}
+            selectedPage={selectedPage}
+            onSelectPage={setSelectedPage}
+          />
+          <SidebarInset>
+            <header className="sticky top-0 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
+              <SidebarTrigger />
+              <div className="flex flex-1 items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {selectedPage && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">
+                        {selectedPage.emoji || "📄"}
+                      </span>
+                      <h1 className="text-lg font-medium">
+                        {selectedPage.title}
+                      </h1>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="icon">
+                    <Settings className="h-4 w-4" />
+                    <span className="sr-only">Settings</span>
+                  </Button>
+                  Welcome to your workspace! This is your first page.
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon">
-                  <Settings className="h-4 w-4" />
-                  <span className="sr-only">Settings</span>
-                </Button>Welcome to your workspace! This is your first page.
-              </div>
-            </div>
-          </header>
-          <main className="flex-1 overflow-auto p-4 sm:p-6">
-           {/* // {selectedPage ? ( */}
+            </header>
+            <main className="flex-1 overflow-auto p-4 sm:p-6">
               <div className="mx-auto">
-                <Outlet/>
+                <Outlet />
               </div>
-
-          </main>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+            </main>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
     </PageProvider>
-  )
+  );
 }
 
 interface NotionSidebarProps {
-  pages: Page[]
-  workspaces: { name: string; emoji: string }[]
-  selectedPage: Page | null
-  onSelectPage: (page: Page) => void
-  onCreatePage: () => void
+  // pages: Page[];
+  workspaces: { name: string; emoji: string }[];
+  selectedPage: Page | null;
+  onSelectPage: (page: Page) => void;
 }
 
-function NotionSidebar({ pages, workspaces, selectedPage, onSelectPage}: NotionSidebarProps) {
-  const [searchQuery, setSearchQuery] = React.useState("")
+function NotionSidebar({
+  // pages,
+  workspaces,
+  selectedPage,
+  onSelectPage,
+}: NotionSidebarProps) {
+  const [searchQuery, setSearchQuery] = React.useState("");
   const fetcher = useFetcher();
+  const { data: pages } = useLoaderData<typeof loader>();
 
-  // const filteredPages = searchQuery
-  //   ? pages.filter((page) => page.title.toLowerCase().includes(searchQuery.toLowerCase()))
-  //   : pages
+  const { setNewPages } = usePageContext();
+
+  React.useEffect(() => {
+    if (pages) {
+      setNewPages(pages);
+    }
+  }, [pages]);
 
   return (
     <Sidebar>
@@ -177,13 +188,18 @@ function NotionSidebar({ pages, workspaces, selectedPage, onSelectPage}: NotionS
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <fetcher.Form action="/api/createPage" method="POST" className="flex items-center">
-                <button 
-                  type="submit"
-                  className="w-full flex items-center gap-x-2">
-                  <FilePlus className="h-4 w-4" />
-                  <span>Create new page</span>
-                </button>
+                <fetcher.Form
+                  action="/api/createPage"
+                  method="POST"
+                  className="flex items-center"
+                >
+                  <button
+                    type="submit"
+                    className="w-full flex items-center gap-x-2"
+                  >
+                    <FilePlus className="h-4 w-4" />
+                    <span>Create new page</span>
+                  </button>
                 </fetcher.Form>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -216,19 +232,23 @@ function NotionSidebar({ pages, workspaces, selectedPage, onSelectPage}: NotionS
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }
 
 interface WorkspaceGroupProps {
-  workspace: { name: string; emoji: string }
-  pages: Page[]
-  selectedPage: Page | null
-  onSelectPage: (page: Page) => void
+  workspace: { name: string; emoji: string };
+  pages: Page[];
+  selectedPage: Page | null;
+  onSelectPage: (page: Page) => void;
 }
 
-function WorkspaceGroup({ workspace }: WorkspaceGroupProps) {
-  const {id} = useParams()
-  const {pages} = usePageContext() 
+function WorkspaceGroup({
+  workspace,
+  pages: initialPage,
+}: WorkspaceGroupProps) {
+  const { id } = useParams();
+  const { pages } = usePageContext();
+  const pagesData = pages ? pages : initialPage;
   return (
     <SidebarGroup>
       <Collapsible defaultOpen className="group/collapsible">
@@ -244,14 +264,14 @@ function WorkspaceGroup({ workspace }: WorkspaceGroupProps) {
         <CollapsibleContent>
           <SidebarGroupContent>
             <SidebarMenu>
-              {pages.map((page) => (
+              {pagesData.map((page) => (
                 <SidebarMenuItem key={page._id}>
                   <SidebarMenuButton asChild isActive={id === page._id}>
-                    <Link 
-                    to={`/dashboard/content/${page._id}`}
-
-                    // onClick={() => onSelectPage(page)} 
-                    className="w-full">
+                    <Link
+                      to={`/dashboard/content/${page._id}`}
+                      // onClick={() => onSelectPage(page)}
+                      className="w-full"
+                    >
                       <span>{page?.emoji || "📄"}</span>
                       <span>{page.title}</span>
                     </Link>
@@ -266,6 +286,5 @@ function WorkspaceGroup({ workspace }: WorkspaceGroupProps) {
         </CollapsibleContent>
       </Collapsible>
     </SidebarGroup>
-  )
+  );
 }
-

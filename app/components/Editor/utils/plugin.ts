@@ -13,10 +13,12 @@ import Code from '@yoopta/code';
 import Table from '@yoopta/table';
 import Divider from '@yoopta/divider';
 import { uploadToCloudinary } from '~/utils/cloudinary';
+import { PagePlugin } from '../withCustomPlugin/customPlugins/Page';
 
 
 export const plugins = [
   Paragraph,
+  PagePlugin,
   HeadingOne,
   HeadingTwo,
   HeadingThree,
