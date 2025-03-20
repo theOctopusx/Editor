@@ -1,7 +1,7 @@
 import { HexColorPicker } from 'react-colorful';
 import { CSSProperties, MouseEvent, useState } from 'react';
 import { YooEditor, UI } from '@yoopta/editor';
-import { ChevronDownIcon, ChevronUpIcon, PaletteIcon } from 'lucide-react';
+import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { useDebouncedCallback } from 'use-debounce';
 
 const { Portal } = UI;
@@ -139,7 +139,7 @@ const HighlightColor = ({ editor, refs, floatingStyles, highlightColors = {} }: 
           </div>
 
           {/* Custom Color Section */}
-          <div className="border-t pt-2 w-full">
+          <div className="border-t w-full">
             <button
               className="text-xs text-[#666C79] flex items-center justify-between w-full"
               onClick={() => setShowColorPicker(!showColorPicker)}

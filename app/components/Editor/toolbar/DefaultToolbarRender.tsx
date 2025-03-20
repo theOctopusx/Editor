@@ -1,14 +1,6 @@
 import {
-  FontBoldIcon,
-  FontItalicIcon,
-  StrikethroughIcon,
-  CodeIcon,
-  UnderlineIcon,
   ChevronDownIcon,
   ChevronUpIcon,
-  TextAlignRightIcon,
-  TextAlignLeftIcon,
-  TextAlignCenterIcon,
 } from '@radix-ui/react-icons';
 import * as Toolbar from '@radix-ui/react-toolbar';
 import { useFloating, offset, flip, shift, inline, autoUpdate } from '@floating-ui/react';
@@ -54,11 +46,11 @@ const DEFAULT_LINK_VALUE: LinkValues = {
   rel: 'noreferrer',
 };
 
-const ALIGN_ICONS = {
-  left: TextAlignLeftIcon,
-  center: TextAlignCenterIcon,
-  right: TextAlignRightIcon,
-};
+// const ALIGN_ICONS = {
+//   left: TextAlignLeftIcon,
+//   center: TextAlignCenterIcon,
+//   right: TextAlignRightIcon,
+// };
 
 const getLinkEntry = (slate) => {
   const [link] = Editor.nodes(slate, {
@@ -239,7 +231,7 @@ const DefaultToolbarRender = ({ activeBlock, editor, toggleHoldToolbar }: Toolba
     Blocks.updateBlock(editor, blockData.id, { meta: { ...blockData.meta, align: nextAlign } });
   };
 
-  const AlignIcon = ALIGN_ICONS[blockData?.meta?.align || 'left'];
+  // const AlignIcon = ALIGN_ICONS[blockData?.meta?.align || 'left'];
 
   const onCloseActionMenu = () => onChangeModal('actionMenu', false);
 
