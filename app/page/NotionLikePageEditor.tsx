@@ -131,13 +131,13 @@ const NotionLikePageEditor = () => {
       </aside>
 
       {/* Editor Area */}
-      <div className="flex-1 pl-4 border" ref={selectionRef}>
+      <div className="flex-1 pl-4 " ref={selectionRef}>
         {data ? (
           <>
             <Input
               value={title}
               onChange={handleTitleChange}
-              className="border-none text-3xl font-bold px-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="border-none text-4xl font-bold px-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               placeholder="Untitled"
             />
             <YooptaEditor

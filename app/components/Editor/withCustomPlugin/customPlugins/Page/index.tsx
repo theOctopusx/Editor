@@ -9,7 +9,7 @@ const PagePlugin = new YooptaPlugin({
       render: PageRenderElement,
       asRoot:true,
       props: {
-        title: "New Test Page",
+        title: "New Page",
         pageId: null,
         nodeType: "void",
       },

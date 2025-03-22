@@ -7,7 +7,7 @@ export const action = async ({ request }: { request: Request }) => {
   const parentPageElementId = formData.get("parentPageElementId");
 
   const result = await ChildPage.create({
-    title: "Untitled Child Page",
+    title: "Untitled Page",
     content: {},
     parentId,
     parentPageBlockId,
