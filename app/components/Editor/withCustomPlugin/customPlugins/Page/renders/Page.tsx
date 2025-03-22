@@ -4,7 +4,8 @@ import {
   PluginElementRenderProps,
   useYooptaEditor,
 } from "@yoopta/editor";
-import { Form, Link, useActionData } from "@remix-run/react";
+import { Form, Link, useActionData, useParams } from "@remix-run/react";
+import FileText from "~/components/Editor/actionMenu/icons/FileText";
 
 const PageRenderElement = ({
   element,
@@ -13,7 +14,8 @@ const PageRenderElement = ({
 }: PluginElementRenderProps) => {
   const actionData = useActionData();
   const editor = useYooptaEditor();
-  console.log("content_id", element.id,'block_id',blockId);
+  console.log("content_id", element.id, "block_id", blockId);
+  const { id } = useParams();
 
   // Listen for API responses via fetcher.
   useEffect(() => {
@@ -49,17 +51,20 @@ const PageRenderElement = ({
       {element?.props?.pageId ? (
         <Link
           to={`/dashboard/content/${element?.props?.pageId}`}
-          className="text-blue-500 hover:underline px-3 py-2 border-2 rounded-sm"
+          className="text-black underline py-2 border-2 rounded-sm flex items-center gap-x-1"
         >
-          {element.props.title}
+         <span><FileText/></span> {element.props.title}
         </Link>
       ) : (
         <Form method="post">
+          <input type="hidden" name="parentId" value={id} />
+          <input type="hidden" name="parentPageBlockId" value={blockId} />
+          <input type="hidden" name="parentPageElementId" value={element.id} />
           <button
             type="submit"
-            className="text-blue-500 hover:underline px-3 py-2 border-2 rounded-sm"
+            className="text-black underline py-2 border-2 flex gap-x-1 rounded-sm items-center"
           >
-            Create New Page
+           <FileText/>Create Page
           </button>
         </Form>
       )}

@@ -7,7 +7,6 @@ import {
   Search,
   Settings,
 } from "lucide-react";
-import { nanoid } from "nanoid";
 import { Button } from "~/components/ui/button";
 import {
   Collapsible,
@@ -39,8 +38,8 @@ import {
   useParams,
 } from "@remix-run/react";
 import { json, LoaderFunction } from "@remix-run/node";
-import { EditorContent } from "~/module/editor/model";
 import { PageProvider, usePageContext } from "~/hooks/use-dashboard";
+import RootPage from "~/module/models/rootPage";
 
 // Define the Page type
 interface Page {
@@ -54,7 +53,7 @@ interface Page {
 export const loader: LoaderFunction = async () => {
   try {
     // Fetch all documents (modify as needed)
-    const editorContents = await EditorContent.find();
+    const editorContents = await RootPage.find();
 
     return json({ success: true, data: editorContents });
   } catch (error) {
@@ -189,7 +188,7 @@ function NotionSidebar({
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <fetcher.Form
-                  action="/api/createPage"
+                  action="/api/createRootPage"
                   method="POST"
                   className="flex items-center"
                 >
