@@ -28,6 +28,38 @@ export const action = async ({ request }: { request: Request }) => {
         { content, title },
         { new: true }
       );
+      const parentId = await updatedContent.parentId;
+      const parentBlockId = await updatedContent.parentPageBlockId;
+      const parentPageElementId = await updatedContent.parentPageElementId
+      // console.log(parentId,'parent id');
+      const parent = await RootPage.findById(parentId)
+
+      const previousTitle = await (parent?.content?.[parentBlockId]?.value?.find(
+        item => item.id === parentPageElementId
+      )?.props?.title);
+      console.log(previousTitle, 'title');
+      
+      // Create an updated version of the full parent's content.
+      const updatedParentContent = {
+        ...parent.content,
+        [parentBlockId]: {
+          ...parent.content[parentBlockId],
+          value: parent.content[parentBlockId].value.map(item => {
+            if (item.id === parentPageElementId) {
+              return {
+                ...item,
+                props: {
+                  ...item.props,
+                  title: title, // replacing previousTitle with the new title value
+                },
+              };
+            }
+            return item;
+          }),
+        },
+      };
+      
+      await RootPage.findByIdAndUpdate(parentId,{content:updatedParentContent})
     }
 
     if (!updatedContent) {
