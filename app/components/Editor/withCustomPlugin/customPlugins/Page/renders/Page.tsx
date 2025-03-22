@@ -15,7 +15,6 @@ const PageRenderElement = ({
   const editor = useYooptaEditor();
   console.log("content_id", element.id, "block_id", blockId);
   const { id } = useParams();
-  console.log("params", params);
 
   // Listen for API responses via fetcher.
   useEffect(() => {

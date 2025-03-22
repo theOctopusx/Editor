@@ -1,14 +1,31 @@
 import { json, LoaderFunction } from "@remix-run/node";
-import { EditorContent } from "~/module/editor/model";
+import ChildPage from "~/module/models/childPage";
 import RootPage from "~/module/models/rootPage";
 import NotionLikePageEditor from "~/page/NotionLikePageEditor";
 
 export const loader: LoaderFunction = async ({ params }) => {
   try {
-    // Fetch all documents (modify as needed)
-    const editorContents = await EditorContent.findOne({ _id: params.id });
+    const { id } = params;
+    if (!id) {
+      return json({ success: false, error: "ID is required" }, { status: 400 });
+    }
 
-    return json({ success: true, data: editorContents });
+    // Try to find the document in RootPage first
+    let editorContent = await RootPage.findOne({ _id: id });
+
+    // If not found, check in ChildPage
+    if (!editorContent) {
+      editorContent = await ChildPage.findOne({ _id: id });
+    }
+
+    if (!editorContent) {
+      return json(
+        { success: false, error: "Content not found" },
+        { status: 404 }
+      );
+    }
+
+    return json({ success: true, data: editorContent });
   } catch (error) {
     console.error("Error fetching editor content:", error);
     return json(
