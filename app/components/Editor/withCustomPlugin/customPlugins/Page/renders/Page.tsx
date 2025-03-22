@@ -4,14 +4,14 @@ import {
   PluginElementRenderProps,
   useYooptaEditor,
 } from "@yoopta/editor";
-import { Link, useFetcher, useParams } from "@remix-run/react";
+import { Form, Link, useActionData, useParams } from "@remix-run/react";
 
 const PageRenderElement = ({
   element,
   attributes,
   blockId,
 }: PluginElementRenderProps) => {
-  const fetcher = useFetcher();
+  const actionData = useActionData();
   const editor = useYooptaEditor();
   console.log("content_id", element.id, "block_id", blockId);
   const { id } = useParams();
@@ -19,11 +19,7 @@ const PageRenderElement = ({
   // Listen for API responses via fetcher.
   useEffect(() => {
     const handleFetcherData = async () => {
-      if (
-        fetcher?.data?.id &&
-        fetcher?.data?.title &&
-        !element?.props?.pageId
-      ) {
+      if (actionData?.id && actionData?.title && !element?.props?.pageId) {
         const elementPath = Elements.getElementPath(editor, blockId, element);
 
         Elements.updateElement(
@@ -33,8 +29,8 @@ const PageRenderElement = ({
             type: "page",
             props: {
               ...element.props,
-              title: fetcher?.data?.title,
-              pageId: fetcher?.data?.id,
+              title: actionData?.title,
+              pageId: actionData?.id,
             },
           },
           { path: elementPath }
@@ -43,7 +39,7 @@ const PageRenderElement = ({
     };
 
     handleFetcherData();
-  }, [fetcher?.data]);
+  }, [actionData]);
 
   return (
     <div
@@ -59,7 +55,7 @@ const PageRenderElement = ({
           {element.props.title}
         </Link>
       ) : (
-        <fetcher.Form method="post" action="/api/createChildPage">
+        <Form method="post">
           <input type="hidden" name="parentId" value={id} />
           <input type="hidden" name="parentPageBlockId" value={blockId} />
           <input type="hidden" name="parentPageElementId" value={element.id} />
@@ -69,7 +65,7 @@ const PageRenderElement = ({
           >
             Create New Page
           </button>
-        </fetcher.Form>
+        </Form>
       )}
     </div>
   );
