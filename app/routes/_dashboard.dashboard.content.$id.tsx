@@ -1,5 +1,6 @@
 import { json, LoaderFunction } from "@remix-run/node";
 import { EditorContent } from "~/module/editor/model";
+import RootPage from "~/module/models/rootPage";
 import NotionLikePageEditor from "~/page/NotionLikePageEditor";
 
 export const loader: LoaderFunction = async ({ params }) => {
@@ -20,7 +21,7 @@ export const loader: LoaderFunction = async ({ params }) => {
 export const action = async ({ request }: { request: Request }) => {
   const formData = await request.formData();
   const title = formData.get("title");
-  const result = await EditorContent.create({
+  const result = await RootPage.create({
     title: title ?? "Untitled Page",
     content: {},
   });

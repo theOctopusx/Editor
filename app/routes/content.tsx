@@ -1,7 +1,6 @@
 import { json, LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { useMemo, useRef } from "react";
-import EditorContent from "~/module/models/editorContent";
 import { connectToDB } from "~/utils/db.server";
 import YooptaEditor, {
     createYooptaEditor,
@@ -26,6 +25,7 @@ import YooptaEditor, {
   import Toolbar, { DefaultToolbarRender } from '@yoopta/toolbar';
   import LinkTool, { DefaultLinkToolRender } from '@yoopta/link-tool';
   import { uploadToCloudinary } from "~/utils/cloudinary";
+import { EditorContent } from "~/module/editor/model";
   
   const plugins = [
     Paragraph,

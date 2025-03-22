@@ -4,21 +4,27 @@ import {
   PluginElementRenderProps,
   useYooptaEditor,
 } from "@yoopta/editor";
-import { Form, Link, useActionData } from "@remix-run/react";
+import { Link, useFetcher, useParams } from "@remix-run/react";
 
 const PageRenderElement = ({
   element,
   attributes,
   blockId,
 }: PluginElementRenderProps) => {
-  const actionData = useActionData();
+  const fetcher = useFetcher();
   const editor = useYooptaEditor();
-  console.log("content_id", element.id,'block_id',blockId);
+  console.log("content_id", element.id, "block_id", blockId);
+  const { id } = useParams();
+  console.log("params", params);
 
   // Listen for API responses via fetcher.
   useEffect(() => {
     const handleFetcherData = async () => {
-      if (actionData?.id && actionData?.title && !element?.props?.pageId) {
+      if (
+        fetcher?.data?.id &&
+        fetcher?.data?.title &&
+        !element?.props?.pageId
+      ) {
         const elementPath = Elements.getElementPath(editor, blockId, element);
 
         Elements.updateElement(
@@ -28,8 +34,8 @@ const PageRenderElement = ({
             type: "page",
             props: {
               ...element.props,
-              title: actionData?.title,
-              pageId: actionData?.id,
+              title: fetcher?.data?.title,
+              pageId: fetcher?.data?.id,
             },
           },
           { path: elementPath }
@@ -38,7 +44,7 @@ const PageRenderElement = ({
     };
 
     handleFetcherData();
-  }, [actionData]);
+  }, [fetcher?.data]);
 
   return (
     <div
@@ -54,14 +60,17 @@ const PageRenderElement = ({
           {element.props.title}
         </Link>
       ) : (
-        <Form method="post">
+        <fetcher.Form method="post" action="/api/createChildPage">
+          <input type="hidden" name="parentId" value={id} />
+          <input type="hidden" name="parentPageBlockId" value={blockId} />
+          <input type="hidden" name="parentPageElementId" value={element.id} />
           <button
             type="submit"
             className="text-blue-500 hover:underline px-3 py-2 border-2 rounded-sm"
           >
             Create New Page
           </button>
-        </Form>
+        </fetcher.Form>
       )}
     </div>
   );
