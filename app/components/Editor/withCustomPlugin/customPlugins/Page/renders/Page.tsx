@@ -62,9 +62,9 @@ const PageRenderElement = ({
           <input type="hidden" name="parentPageElementId" value={element.id} />
           <button
             type="submit"
-            className="text-blue-500 hover:underline px-3 py-2 border-2 rounded-sm"
+            className="text-black underline py-2 border-2 flex gap-x-1 rounded-sm items-center"
           >
-            Create New Page
+           <FileText/>Create Page
           </button>
         </Form>
       )}
