@@ -34,6 +34,7 @@ const NotionLikePageEditor = () => {
 
   const [title, setTitle] = useState<string>(data?.title || "Untitled");
   const [value, setValue] = useState<YooptaContentValue>(data?.content || {});
+  console.log("value", value);
   const [editorId, setEditorId] = useState<string>(generateId());
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
@@ -51,25 +52,47 @@ const NotionLikePageEditor = () => {
   const renderHierarchy = (nodes: any[]) => {
     return (
       <ul className="ml-4">
-        {nodes.map((node: { id: any; text: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; occurrenceIndex: any; children: string | any[]; }, index: any) => (
-          <li key={`${node.id}-${index}`} className="my-1">
-            <button
-              className={`text-left hover:underline ${
-                activeHeading === `${node.text}-${node.occurrenceIndex}`
-                  ? "font-bold text-blue-600"
-                  : "font-semibold"
-              }`}
-              onClick={() =>
-                scrollToHeadingByText(node.text, node.occurrenceIndex,setActiveHeading)
-              }
-            >
-              {node.text}
-            </button>
-            {node?.children &&
-              node?.children.length > 0 &&
-              renderHierarchy(node?.children)}
-          </li>
-        ))}
+        {nodes.map(
+          (
+            node: {
+              id: any;
+              text:
+                | string
+                | number
+                | boolean
+                | ReactElement<any, string | JSXElementConstructor<any>>
+                | Iterable<ReactNode>
+                | ReactPortal
+                | null
+                | undefined;
+              occurrenceIndex: any;
+              children: string | any[];
+            },
+            index: any
+          ) => (
+            <li key={`${node.id}-${index}`} className="my-1">
+              <button
+                className={`text-left hover:underline ${
+                  activeHeading === `${node.text}-${node.occurrenceIndex}`
+                    ? "font-bold text-blue-600"
+                    : "font-semibold"
+                }`}
+                onClick={() =>
+                  scrollToHeadingByText(
+                    node.text,
+                    node.occurrenceIndex,
+                    setActiveHeading
+                  )
+                }
+              >
+                {node.text}
+              </button>
+              {node?.children &&
+                node?.children.length > 0 &&
+                renderHierarchy(node?.children)}
+            </li>
+          )
+        )}
       </ul>
     );
   };
@@ -136,18 +159,14 @@ const NotionLikePageEditor = () => {
 
     deletedKeys.forEach((key) => {
       const deletedElement = prev[key];
-      // If not already soft-deleted, mark and store it in trash
-      if (!deletedElement.meta?.isDeleted) {
-        const trashEntry = {
-          pageId: deletedElement.id,
-          parentId: deletedElement.meta?.parentId || null,
-          order: deletedElement.meta?.order ?? 0,
-          deletedAt: Date.now(),
-          element: deletedElement,
-        };
-        setTrash((prevTrash) => [...prevTrash, trashEntry]);
-        console.log("Soft-deleted element added to trash:", trashEntry);
-      }
+      const trashEntry = {
+        pageId: deletedElement.id,
+        parentId: id,
+        order: deletedElement.meta?.order,
+        deletedAt: Date.now(),
+        element: deletedElement,
+      };
+      setTrash((prevTrash) => [...prevTrash, trashEntry]);
     });
 
     // Update prevValueRef for next comparison
@@ -160,6 +179,13 @@ const NotionLikePageEditor = () => {
       console.log("Current Trash State:", trash);
     }
   }, [trash]);
+
+  // * reset the trash state when the component unmounts
+  useEffect(() => {
+    return () => {
+      setTrash([]);
+    };
+  }, [id]);
 
   return (
     <div className="flex gap-x-10 md:py-[100px] w-full px-[20px] pt-[80px] pb-[40px]">
