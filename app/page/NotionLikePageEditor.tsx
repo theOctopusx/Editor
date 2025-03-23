@@ -4,8 +4,18 @@ import YooptaEditor, {
   createYooptaEditor,
   YooptaContentValue,
   generateId,
+  Elements,
 } from "@yoopta/editor";
-import { JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useEffect, useMemo, useRef, useState } from "react";
+import {
+  JSXElementConstructor,
+  ReactElement,
+  ReactNode,
+  ReactPortal,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { generateHeadingHierarchy } from "~/components/Editor/editorFunction/generateHeadingHierarchy";
 import { scrollToHeadingByText } from "~/components/Editor/editorFunction/scrollToHeadingByText";
 import { MARKS } from "~/components/Editor/utils/marks";
@@ -24,16 +34,18 @@ const NotionLikePageEditor = () => {
 
   const [title, setTitle] = useState<string>(data?.title || "Untitled");
   const [value, setValue] = useState<YooptaContentValue>(data?.content || {});
-  console.log("value", value);
   const [editorId, setEditorId] = useState<string>(generateId());
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
 
+  // NEW: Trash state to hold soft-deleted blocks
+  const [trash, setTrash] = useState<any[]>([]);
 
+  // We'll use a ref to store the previous editor value
+  const prevValueRef = useRef<YooptaContentValue>(value);
+
+  // Existing hierarchy generation for sidebar
   const hierarchy = generateHeadingHierarchy(value);
-
-  // Function to scroll to a heading element by matching its text and occurrence index.
-  
 
   // Recursive component to render the hierarchy with clickable headings.
   const renderHierarchy = (nodes: any[]) => {
@@ -62,7 +74,7 @@ const NotionLikePageEditor = () => {
     );
   };
 
-
+  // Update editor id, title and value when data changes
   useEffect(() => {
     if (data) {
       setEditorId(generateId());
@@ -87,17 +99,14 @@ const NotionLikePageEditor = () => {
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
-    updatePageTitle(id as string,e.target.value)
+    updatePageTitle(id as string, e.target.value);
   };
 
   const handleContentChange = (newValue: YooptaContentValue) => {
     setValue(newValue);
   };
 
-  const saveEditorData = async (
-    // updatedTitle: string,
-    updatedContent: YooptaContentValue
-  ) => {
+  const saveEditorData = async (updatedContent: YooptaContentValue) => {
     setIsSaving(true);
     try {
       await fetch("/api/save-editor", {
@@ -116,6 +125,42 @@ const NotionLikePageEditor = () => {
     }
   };
 
+  // NEW: Detect deletions by comparing previous and current value
+  useEffect(() => {
+    const prev = prevValueRef.current;
+    const current = value;
+
+    // In your YooptaContentValue, keys represent individual block IDs.
+    // Find keys that existed previously but are missing now.
+    const deletedKeys = Object.keys(prev).filter((key) => !(key in current));
+
+    deletedKeys.forEach((key) => {
+      const deletedElement = prev[key];
+      // If not already soft-deleted, mark and store it in trash
+      if (!deletedElement.meta?.isDeleted) {
+        const trashEntry = {
+          pageId: deletedElement.id,
+          parentId: deletedElement.meta?.parentId || null,
+          order: deletedElement.meta?.order ?? 0,
+          deletedAt: Date.now(),
+          element: deletedElement,
+        };
+        setTrash((prevTrash) => [...prevTrash, trashEntry]);
+        console.log("Soft-deleted element added to trash:", trashEntry);
+      }
+    });
+
+    // Update prevValueRef for next comparison
+    prevValueRef.current = current;
+  }, [value]);
+
+  // For demonstration, log trash state changes
+  useEffect(() => {
+    if (trash.length > 0) {
+      console.log("Current Trash State:", trash);
+    }
+  }, [trash]);
+
   return (
     <div className="flex gap-x-10 md:py-[100px] w-full px-[20px] pt-[80px] pb-[40px]">
       {/* Sidebar Summary */}
@@ -131,7 +176,7 @@ const NotionLikePageEditor = () => {
       </aside>
 
       {/* Editor Area */}
-      <div className="flex-1 pl-4 " ref={selectionRef}>
+      <div className="flex-1 pl-4" ref={selectionRef}>
         {data ? (
           <>
             <Input
