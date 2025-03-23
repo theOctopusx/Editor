@@ -11,6 +11,7 @@ const PagePlugin = new YooptaPlugin({
       props: {
         title: "New Page",
         pageId: null,
+        parentId: null,
         nodeType: "void",
       },
     },
