@@ -2,7 +2,6 @@
 import { json } from "@remix-run/node";
 import ChildPage from "~/module/models/childPage";
 import RootPage from "~/module/models/rootPage";
-
 import { Model, Document } from "mongoose";
 
 // Define interfaces for your page's content structure.
@@ -10,6 +9,11 @@ interface ContentItem {
   id: string;
   props: {
     title: string;
+    [key: string]: any;
+  };
+  type: string;
+  meta?: {
+    order?: number;
     [key: string]: any;
   };
   [key: string]: any;
@@ -52,10 +56,11 @@ const updateParentContent = async (
       ...parentPage.content,
       [parentPageBlockId]: {
         ...parentPage.content[parentPageBlockId],
-        value: parentPage.content[parentPageBlockId].value.map((item: ContentItem) =>
-          item.id === parentPageElementId
-            ? { ...item, props: { ...item.props, title } }
-            : item
+        value: parentPage.content[parentPageBlockId].value.map(
+          (item: ContentItem) =>
+            item.id === parentPageElementId
+              ? { ...item, props: { ...item.props, title } }
+              : item
         ),
       },
     };
@@ -63,6 +68,16 @@ const updateParentContent = async (
     return true;
   }
   return false;
+};
+
+/**
+ * Helper to store a deleted "Page" block.
+ * You can later implement this function to insert the trash entry into a dedicated collection.
+ */
+const storeDeletedPage = async (trashEntry: any) => {
+  // For now, simply log the deleted block.
+  console.log("Storing deleted page in trash:", trashEntry);
+  // TODO: Save trashEntry into your trash collection/model.
 };
 
 export const action = async ({ request }: { request: Request }) => {
@@ -79,8 +94,54 @@ export const action = async ({ request }: { request: Request }) => {
       });
     }
 
-    // Attempt to update the content in RootPage.
-    let updatedContent = await RootPage.findOneAndUpdate(
+    // Determine if the content belongs to a RootPage or ChildPage.
+    let PageModel: PageModelType | null = null;
+    let existingPage: any = await RootPage.findById(contentId);
+    if (!existingPage) {
+      existingPage = await ChildPage.findById(contentId);
+      if (existingPage) {
+        PageModel = ChildPage;
+      }
+    } else {
+      PageModel = RootPage;
+    }
+
+    if (!existingPage || !PageModel) {
+      return json({ error: "Content not found" }, { status: 404 });
+    }
+
+    // Compare previous content (from DB) with new content (from request).
+    const previousContent = existingPage.content || {};
+    const newContent = content || {};
+
+    // Get keys for blocks in previous content.
+    const previousKeys = Object.keys(previousContent);
+    // Get keys for blocks in new content.
+    const newKeys = Object.keys(newContent);
+
+    // Find block keys that existed before but are missing now.
+    const deletedKeys = previousKeys.filter((key) => !newKeys.includes(key));
+
+    // For each deleted block, check if its type is "Page" and store it in trash.
+    for (const key of deletedKeys) {
+      const deletedBlock = previousContent[key];
+      // Loop through the block's items (since value is an array)
+      deletedBlock.value.forEach(async (item: ContentItem) => {
+        if (item.type === "page") {
+        const trashEntry = {
+          pageId: item.props.pageId, // the deleted page's _id,
+          parentId: item.props.parentId, // the parent page ID
+          order: item.children.meta?.order,
+          deletedAt: Date.now(),
+          element: item,
+        };
+        await storeDeletedPage(trashEntry);
+        }
+      });
+    }
+
+    // Now update the page content.
+    let updatedContent = await PageModel.findOneAndUpdate(
       { _id: contentId },
       { content, title },
       { new: true }
@@ -96,7 +157,8 @@ export const action = async ({ request }: { request: Request }) => {
 
       // If a ChildPage is updated, update its parent.
       if (updatedContent) {
-        const { parentId, parentPageBlockId, parentPageElementId } = updatedContent;
+        const { parentId, parentPageBlockId, parentPageElementId } =
+          updatedContent as any;
         // Try updating in RootPage first.
         const parentUpdated = await updateParentContent(
           RootPage,
