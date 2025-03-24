@@ -31,9 +31,11 @@ export const action = async ({ request }: { request: Request }) => {
       }).updateMany({ isDeleted: false, deletedAt: null });
 
       // * Step 3 - Get the deleted block from trash and restore it to parent page
-      const deletedTrash = await TrashEntry.find({ pageId });
+      const deletedTrash = await TrashEntry.findOne({ pageId });
       const deletedBlock = deletedTrash?.deletedBlock;
       const parentPageId = deletedTrash?.parentId;
+      console.log("Deleted block", deletedBlock);
+      console.log("Parent page id", parentPageId);
       const parentPage = await RootPage.findOne({ _id: parentPageId });
       console.log("Parent page", parentPage);
       const updateParentPage = await RootPage.findByIdAndUpdate(parentPageId, {
