@@ -66,7 +66,7 @@ const updateParentContent = async (
   return false;
 };
 
-const storeDeletedPage = async (trashEntry) => {
+const storeDeletedPage = async (trashEntry: any) => {
   const pageId = trashEntry?.pageId;
   const addToTrash = await TrashEntry.create(trashEntry);
 
@@ -164,7 +164,7 @@ export const action = async ({ request }: { request: Request }) => {
           parentId: item.props.parentId, // the parent page ID
           order: deletedBlock?.meta?.order,
           deletedAt: Date.now(),
-          element: item,
+          deletedBlock: deletedBlock,
         };
         await storeDeletedPage(trashEntry);
         }
