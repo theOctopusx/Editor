@@ -21,7 +21,7 @@ export const loader: LoaderFunction = async () => {
 const Trash = () => {
     const {rootPageTrash,childpageTrash} = useLoaderData()
     // console.log(childpageTrash);
-    const childPage = childpageTrash.map(page => page.element.props)
+    const childPage = childpageTrash.map(page => page?.element?.props)
     console.log(childPage);
   return (
     <div className="p-4">
@@ -38,9 +38,9 @@ const Trash = () => {
       <h2 className="text-xl font-semibold my-4">Child Page List</h2>
       <ul className="space-y-2">
         {childPage?.map((page) => (
-          <li key={page.pageId} className="border-b pb-2">
-            <Link to={`/dashboard/content/${page.pageId}`} className="text-blue-500 hover:underline">
-              {page.title}
+          <li key={page?.pageId} className="border-b pb-2">
+            <Link to={`/dashboard/content/${page?.pageId}`} className="text-blue-500 hover:underline">
+              {page?.title}
             </Link>
           </li>
         ))}

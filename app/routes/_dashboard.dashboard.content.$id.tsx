@@ -3,7 +3,14 @@ import { useLoaderData } from "@remix-run/react";
 import { useState } from "react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "~/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
 import ChildPage from "~/module/models/childPage";
 import RootPage from "~/module/models/rootPage";
 import NotionLikePageEditor from "~/page/NotionLikePageEditor";
@@ -66,50 +73,42 @@ export const action = async ({ request }: { request: Request }) => {
 };
 
 const PageContent = () => {
-  const {data} = useLoaderData()
+  const { data } = useLoaderData();
   console.log(data);
   // const [trashNotification, setTrashNotification] = useState(data?.isDeleted)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
 
-  const handleDeletePermanently = () =>{
+  const handleDeletePermanently = () => {
     // console.log(pageId);
-    if(data.parentId){
+    if (data.parentId) {
       console.log(data.parentId);
-    }
-    else{
+    } else {
       console.log(data._id);
     }
-  }
+  };
   const handleRestore = async () => {
-    if(data.parentId){
-      console.log(data.parentId)
+    try {
+      await fetch("/api/restorePage", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pageId: data._id,
+        }),
+      });
+      console.log("Page restored successfully");
+    } catch (error) {
+      console.log(error);
     }
-    else{
-      console.log(data._id);
-      try{
-        await fetch('/api/restorePage',{
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            pageId:data._id,
-          }),
-        })
-      }
-      catch(error){
-        console.log(error);
-      }
-    }
-  }
+  };
   return (
     <div>
-
-{data?.isDeleted && (
+      {data?.isDeleted && (
         <Alert className="fixed top-0 left-0 right-0 z-50 bg-destructive text-destructive-foreground border-none">
           <AlertDescription className="flex items-center justify-between w-full">
             <span>
-              Moved this page to Trash just now. It will automatically be deleted in 30
-              days.
+              Moved this page to Trash just now. It will automatically be
+              deleted in 30 days.
             </span>
             <div className="flex gap-2">
               <Button
@@ -117,7 +116,7 @@ const PageContent = () => {
                 size="sm"
                 className="bg-transparent text-white border-white hover:bg-white/20 hover:text-white"
                 onClick={() => {
-                  return setRestoreDialogOpen(true)
+                  return setRestoreDialogOpen(true);
                   // const page = pages?.find((p) => p._id === trashNotification.pageId)
                   // if (page) openRestoreDialog(page)
                 }}
@@ -129,7 +128,7 @@ const PageContent = () => {
                 size="sm"
                 className="bg-transparent text-white border-white hover:bg-white/20 hover:text-white"
                 onClick={() => {
-                  setDeleteDialogOpen(true)
+                  setDeleteDialogOpen(true);
                   // const page = pages?.find((p) => p._id === trashNotification.pageId)
                   // if (page) openDeleteDialog(page)
                 }}
@@ -140,15 +139,20 @@ const PageContent = () => {
           </AlertDescription>
         </Alert>
       )}
-       {/* Delete Confirmation Dialog */}
-       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete permanently?</DialogTitle>
-            <DialogDescription>This page will be permanently deleted and cannot be recovered.</DialogDescription>
+            <DialogDescription>
+              This page will be permanently deleted and cannot be recovered.
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDeletePermanently}>
@@ -163,10 +167,15 @@ const PageContent = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Restore page?</DialogTitle>
-            <DialogDescription>This page will be restored to your workspace.</DialogDescription>
+            <DialogDescription>
+              This page will be restored to your workspace.
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRestoreDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setRestoreDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleRestore}>Restore page</Button>

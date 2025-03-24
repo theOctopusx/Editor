@@ -53,10 +53,11 @@ const updateParentContent = async (
       ...parentPage.content,
       [parentPageBlockId]: {
         ...parentPage.content[parentPageBlockId],
-        value: parentPage.content[parentPageBlockId].value.map((item: ContentItem) =>
-          item.id === parentPageElementId
-            ? { ...item, props: { ...item.props, title } }
-            : item
+        value: parentPage.content[parentPageBlockId].value.map(
+          (item: ContentItem) =>
+            item.id === parentPageElementId
+              ? { ...item, props: { ...item.props, title } }
+              : item
         ),
       },
     };
@@ -70,10 +71,17 @@ const storeDeletedPage = async (trashEntry: any) => {
   const pageId = trashEntry?.pageId;
   const addToTrash = await TrashEntry.create(trashEntry);
 
-  const page = await ChildPage.findByIdAndUpdate(pageId,{isDeleted:true,deletedAt:new Date()})
-  console.log(addToTrash,'Trash Added');
-  console.log(page,'Page Updated');
-}
+  const page = await ChildPage.findByIdAndUpdate(pageId, {
+    isDeleted: true,
+    deletedAt: new Date(),
+  });
+  await ChildPage.find({ parentId: pageId }).updateMany({
+    isDeleted: true,
+    deletedAt: new Date(),
+  });
+  console.log(addToTrash, "Trash Added");
+  console.log(page, "Page Updated");
+};
 
 export const action = async ({ request }: { request: Request }) => {
   try {
@@ -90,10 +98,10 @@ export const action = async ({ request }: { request: Request }) => {
     }
     let existingPage;
 
-    existingPage = await RootPage.findById(contentId)
+    existingPage = await RootPage.findById(contentId);
 
-    if(!existingPage){
-      existingPage = await ChildPage.findById(contentId)
+    if (!existingPage) {
+      existingPage = await ChildPage.findById(contentId);
     }
 
     // Attempt to update the content in RootPage.
@@ -113,7 +121,8 @@ export const action = async ({ request }: { request: Request }) => {
 
       // If a ChildPage is updated, update its parent.
       if (updatedContent) {
-        const { parentId, parentPageBlockId, parentPageElementId } = updatedContent;
+        const { parentId, parentPageBlockId, parentPageElementId } =
+          updatedContent;
         // Try updating in RootPage first.
         const parentUpdated = await updateParentContent(
           RootPage,
@@ -139,8 +148,6 @@ export const action = async ({ request }: { request: Request }) => {
       return json({ error: "Content not found" }, { status: 404 });
     }
 
-
-
     // Compare previous content (from DB) with new content (from request).
     const previousContent = existingPage.content || {};
     const newContent = content || {};
@@ -159,14 +166,15 @@ export const action = async ({ request }: { request: Request }) => {
       // Loop through the block's items (since value is an array)
       deletedBlock.value.forEach(async (item: ContentItem) => {
         if (item.type === "page") {
-        const trashEntry = {
-          pageId: item.props.pageId, // the deleted page's _id,
-          parentId: item.props.parentId, // the parent page ID
-          order: deletedBlock?.meta?.order,
-          deletedAt: Date.now(),
-          deletedBlock: deletedBlock,
-        };
-        await storeDeletedPage(trashEntry);
+          const trashEntry = {
+            pageId: item.props.pageId, // the deleted page's _id,
+            parentId: item.props.parentId, // the parent page ID
+            order: deletedBlock?.meta?.order,
+            deletedAt: Date.now(),
+            deletedBlock: deletedBlock,
+            element: item,
+          };
+          await storeDeletedPage(trashEntry);
         }
       });
     }

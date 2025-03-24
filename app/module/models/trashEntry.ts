@@ -5,7 +5,8 @@ const PageSchema = new mongoose.Schema({
     parentId: { type: String, required: true },
     order: { type: Number, required: true },
     deletedAt: { type: Date, default: null },
-    deletedBlock: { type: Object, required: true }
+    deletedBlock: { type: Object, required: true },
+    element : { type: Object, required: true }
   });
   
 const TrashEntry =
