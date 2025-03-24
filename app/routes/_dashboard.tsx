@@ -1,11 +1,15 @@
 import * as React from "react";
 import {
   ChevronDown,
+  Copy,
+  Edit,
   FilePlus,
   Home,
   MoreHorizontal,
   Search,
   Settings,
+  Share2,
+  Trash,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
@@ -40,6 +44,8 @@ import {
 import { json, LoaderFunction } from "@remix-run/node";
 import { PageProvider, usePageContext } from "~/hooks/use-dashboard";
 import RootPage from "~/module/models/rootPage";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 // Define the Page type
 interface Page {
@@ -53,7 +59,7 @@ interface Page {
 export const loader: LoaderFunction = async () => {
   try {
     // Fetch all documents (modify as needed)
-    const editorContents = await RootPage.find();
+    const editorContents = await RootPage.find({isDeleted:false});
 
     return json({ success: true, data: editorContents });
   } catch (error) {
@@ -241,13 +247,44 @@ interface WorkspaceGroupProps {
   onSelectPage: (page: Page) => void;
 }
 
-function WorkspaceGroup({
-  workspace,
-  pages: initialPage,
-}: WorkspaceGroupProps) {
-  const { id } = useParams();
-  const { pages } = usePageContext();
-  const pagesData = pages ? pages : initialPage;
+function WorkspaceGroup({ workspace, pages: initialPage }: WorkspaceGroupProps) {
+  const { id } = useParams()
+  const { pages,setNewPages } = usePageContext()
+  const pagesData = pages ? pages : initialPage
+
+  const handleDelete = async (pageId: string) => {
+    // Implement delete functionality
+    console.log("Delete page:", pageId)
+    try {
+      await fetch("/api/deleteRootPage", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pageId,
+        }),
+      });
+      toast.success('SuccessFully Deleted Root Page')
+      setNewPages(pages.filter(page => page._id !==pageId))
+    } catch (error) {
+      console.error("Error saving content:", error);
+    }
+  }
+
+  const handleShare = (pageId: string) => {
+    // Implement share functionality
+    console.log("Share page:", pageId)
+  }
+
+  const handleDuplicate = (pageId: string) => {
+    // Implement duplicate functionality
+    console.log("Duplicate page:", pageId)
+  }
+
+  const handleEdit = (pageId: string) => {
+    // Implement edit functionality
+    console.log("Edit page:", pageId)
+  }
+
   return (
     <SidebarGroup>
       <Collapsible defaultOpen className="group/collapsible">
@@ -266,18 +303,40 @@ function WorkspaceGroup({
               {pagesData.map((page) => (
                 <SidebarMenuItem key={page._id}>
                   <SidebarMenuButton asChild isActive={id === page._id}>
-                    <Link
-                      to={`/dashboard/content/${page._id}`}
-                      // onClick={() => onSelectPage(page)}
-                      className="w-full"
-                    >
+                    <Link to={`/dashboard/content/${page._id}`} className="w-full">
                       <span>{page?.emoji || "📄"}</span>
                       <span>{page.title}</span>
                     </Link>
                   </SidebarMenuButton>
-                  <SidebarMenuAction showOnHover>
-                    <MoreHorizontal className="h-4 w-4" />
-                  </SidebarMenuAction>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuAction showOnHover>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </SidebarMenuAction>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="right" align="start" className="w-48">
+                      <DropdownMenuItem onClick={() => handleEdit(page._id)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        <span>Edit</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleShare(page._id)}>
+                        <Share2 className="mr-2 h-4 w-4" />
+                        <span>Share</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDuplicate(page._id)}>
+                        <Copy className="mr-2 h-4 w-4" />
+                        <span>Duplicate</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => handleDelete(page._id)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash className="mr-2 h-4 w-4" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -285,5 +344,5 @@ function WorkspaceGroup({
         </CollapsibleContent>
       </Collapsible>
     </SidebarGroup>
-  );
+  )
 }
