@@ -36,14 +36,27 @@ export const action = async ({ request }: { request: Request }) => {
       const parentPageId = deletedTrash?.parentId;
       console.log("Deleted block", deletedBlock);
       console.log("Parent page id", parentPageId);
-      const parentPage = await RootPage.findOne({ _id: parentPageId });
+      let parentPage = null;
+      parentPage = await RootPage.findOne({ _id: parentPageId });
+      if (!parentPage) {
+        parentPage = await ChildPage.findOne({ _id: parentPageId });
+      }
       console.log("Parent page", parentPage);
-      const updateParentPage = await RootPage.findByIdAndUpdate(parentPageId, {
+      let updateParentPage = null;
+      updateParentPage = await RootPage.findByIdAndUpdate(parentPageId, {
         content: {
           ...parentPage?.content,
           [deletedBlock?.id]: deletedBlock,
         },
       });
+      if (!updateParentPage) {
+        updateParentPage = await ChildPage.findByIdAndUpdate(parentPageId, {
+          content: {
+            ...parentPage?.content,
+            [deletedBlock?.id]: deletedBlock,
+          },
+        });
+      }
       console.log(updateParentPage, "Parent page updated");
 
       //* Step 4 - Delete the entry from trash
