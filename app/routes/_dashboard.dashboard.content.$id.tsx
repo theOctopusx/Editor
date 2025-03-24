@@ -67,24 +67,39 @@ export const action = async ({ request }: { request: Request }) => {
 
 const PageContent = () => {
   const {data} = useLoaderData()
-  // console.log(data);
+  console.log(data);
   // const [trashNotification, setTrashNotification] = useState(data?.isDeleted)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false)
-  const openDeleteDialog = () => {
-    // setSelectedPage(page)
-    setDeleteDialogOpen(true)
-  }
 
-  const openRestoreDialog = () => {
-    // setSelectedPage(page)
-    setRestoreDialogOpen(true)
-  }
   const handleDeletePermanently = () =>{
     // console.log(pageId);
+    if(data.parentId){
+      console.log(data.parentId);
+    }
+    else{
+      console.log(data._id);
+    }
   }
-  const handleRestore = () => {
-    console.log("Restore");
+  const handleRestore = async () => {
+    if(data.parentId){
+      console.log(data.parentId)
+    }
+    else{
+      console.log(data._id);
+      try{
+        await fetch('/api/restorePage',{
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            pageId:data._id,
+          }),
+        })
+      }
+      catch(error){
+        console.log(error);
+      }
+    }
   }
   return (
     <div>

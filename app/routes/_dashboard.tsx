@@ -10,6 +10,7 @@ import {
   Settings,
   Share2,
   Trash,
+  Trash2,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
@@ -21,6 +22,7 @@ import { Input } from "~/components/ui/input";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -39,6 +41,7 @@ import {
   Outlet,
   useFetcher,
   useLoaderData,
+  useNavigate,
   useParams,
 } from "@remix-run/react";
 import { json, LoaderFunction } from "@remix-run/node";
@@ -251,6 +254,7 @@ function WorkspaceGroup({ workspace, pages: initialPage }: WorkspaceGroupProps) 
   const { id } = useParams()
   const { pages,setNewPages } = usePageContext()
   const pagesData = pages ? pages : initialPage
+  const navigate = useNavigate();
 
   const handleDelete = async (pageId: string) => {
     // Implement delete functionality
@@ -265,6 +269,7 @@ function WorkspaceGroup({ workspace, pages: initialPage }: WorkspaceGroupProps) 
       });
       toast.success('SuccessFully Deleted Root Page')
       setNewPages(pages.filter(page => page._id !==pageId))
+      navigate('/dashboard')
     } catch (error) {
       console.error("Error saving content:", error);
     }
@@ -343,6 +348,23 @@ function WorkspaceGroup({ workspace, pages: initialPage }: WorkspaceGroupProps) 
           </SidebarGroupContent>
         </CollapsibleContent>
       </Collapsible>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              // isActive={location.pathname === "/dashboard/trash"}
+            >
+              <Link to="/dashboard/trash" className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span>Trash</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </SidebarGroup>
   )
 }
