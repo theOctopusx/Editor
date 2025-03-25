@@ -67,20 +67,50 @@ const updateParentContent = async (
   return false;
 };
 
+const markChildrenDeleted = async (parentId: string) => {
+  // Find all immediate children of the given parentId
+  const children = await ChildPage.find({ parentId });
+  if (!children.length) return; // Base case: no children, exit
+
+  // Iterate over each child page
+  for (const child of children) {
+    // Update the child page to mark it as deleted
+    await ChildPage.findByIdAndUpdate(child._id, {
+      isDeleted: true,
+      deletedAt: new Date(),
+    });
+
+    // Recursively update any nested children for this child page
+    await markChildrenDeleted(child._id);
+  }
+};
+
 const storeDeletedPage = async (trashEntry: any) => {
   const pageId = trashEntry?.pageId;
-  const addToTrash = await TrashEntry.create(trashEntry);
 
-  const page = await ChildPage.findByIdAndUpdate(pageId, {
+  // Store trash entry and update parent page
+  const addToTrash = await TrashEntry.create(trashEntry);
+  console.log("Added to trash", addToTrash);
+  await ChildPage.findByIdAndUpdate(pageId, {
     isDeleted: true,
     deletedAt: new Date(),
   });
-  await ChildPage.find({ parentId: pageId }).updateMany({
-    isDeleted: true,
-    deletedAt: new Date(),
-  });
-  console.log(addToTrash, "Trash Added");
-  console.log(page, "Page Updated");
+
+  // Update immediate children of the page
+  await ChildPage.updateMany(
+    { parentId: pageId },
+    {
+      isDeleted: true,
+      deletedAt: new Date(),
+    }
+  );
+
+  // Recursively update all nested children pages
+  await markChildrenDeleted(pageId);
+
+  // Optionally, fetch the collection of updated children pages
+  const deletedChildPageCollection = await ChildPage.find({ parentId: pageId });
+  console.log("Deleted children", deletedChildPageCollection);
 };
 
 export const action = async ({ request }: { request: Request }) => {
