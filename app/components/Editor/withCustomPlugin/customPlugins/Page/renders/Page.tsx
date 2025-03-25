@@ -14,7 +14,6 @@ const PageRenderElement = ({
 }: PluginElementRenderProps) => {
   const actionData = useActionData();
   const editor = useYooptaEditor();
-  console.log("content_id", element.id, "block_id", blockId);
   const { id } = useParams();
 
   // Listen for API responses via fetcher.
@@ -32,6 +31,7 @@ const PageRenderElement = ({
               ...element.props,
               title: actionData?.title,
               pageId: actionData?.id,
+              parentId: id,
             },
           },
           { path: elementPath }
