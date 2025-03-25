@@ -55,10 +55,12 @@ export const action = async ({ request }: { request: Request }) => {
       // Recursively restore any nested child pages
       await restoreChildren(pageId);
 
-      // Restore the deleted block into the parent page content
+      // Restore the deleted block into the parent page content dynamically based on order
       const deletedTrash = await TrashEntry.findOne({ pageId });
       const deletedBlock = deletedTrash?.deletedBlock;
       const parentPageId = deletedTrash?.parentId;
+      const order = deletedTrash?.order;
+      console.log("Deleted block order", order);
       console.log("Deleted block", deletedBlock);
       console.log("Parent page id", parentPageId);
 
@@ -68,18 +70,38 @@ export const action = async ({ request }: { request: Request }) => {
       }
       console.log("Parent page", parentPage);
 
+      // Create a shallow copy of the parent's content to modify
+      const updatedContent = { ...parentPage.content };
+
+      // Iterate through the parent's content to update order of blocks at or after the given order
+      for (const key in updatedContent) {
+        if (Object.prototype.hasOwnProperty.call(updatedContent, key)) {
+          const block = updatedContent[key];
+          if (
+            block.meta &&
+            typeof block.meta.order === "number" &&
+            block.meta.order >= order
+          ) {
+            block.meta.order = block.meta.order + 1;
+          }
+        }
+      }
+
+      // Set the deletedBlock's order to the trash block order
+      if (deletedBlock && deletedBlock.meta) {
+        deletedBlock.meta.order = order;
+      }
+
+      // Insert the deletedBlock into the parent's content
+      updatedContent[deletedBlock.id] = deletedBlock;
+
+      // Update the parent page with the new content
       let updateParentPage = await RootPage.findByIdAndUpdate(parentPageId, {
-        content: {
-          ...parentPage?.content,
-          [deletedBlock?.id]: deletedBlock,
-        },
+        content: updatedContent,
       });
       if (!updateParentPage) {
         updateParentPage = await ChildPage.findByIdAndUpdate(parentPageId, {
-          content: {
-            ...parentPage?.content,
-            [deletedBlock?.id]: deletedBlock,
-          },
+          content: updatedContent,
         });
       }
       console.log(updateParentPage, "Parent page updated");
