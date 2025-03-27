@@ -14,6 +14,7 @@ import Table from '@yoopta/table';
 import Divider from '@yoopta/divider';
 import { uploadToCloudinary } from '~/utils/cloudinary';
 import { PagePlugin } from '../withCustomPlugin/customPlugins/Page';
+import { uploadToR2 } from '~/utils/r2Upload';
 
 
 export const plugins = [
@@ -42,18 +43,33 @@ export const plugins = [
       async onUpload(file): Promise<ImageUploadResponse> {
         if (!file) {
           console.error("No file received");
-          return file
+          return null;
         }
-
+  
         console.log("Uploading file:", file); // Check if file is received
-
+  
         try {
-          const data = await uploadToCloudinary(file, 'image');
+          // Create a FormData object and append the file.
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("type",'image')
+  
+          // Send the form data to your API endpoint.
+          const response = await fetch("/api/r2upload", {
+            method: "POST",
+            body: formData,
+          });
+  
+          if (!response.ok) {
+            throw new Error(`Upload failed with status ${response.status}`);
+          }
+  
+          const data = await response.json();
           console.log("Upload response:", data); // Check response
-
+  
           return {
             src: data.secure_url,
-            alt: 'cloudinary',
+            alt: "r2",
             sizes: {
               width: data.width,
               height: data.height,
@@ -84,6 +100,80 @@ export const plugins = [
         return image.secure_url;
       },
     },
+    // options: {
+    //   async onUpload(file) {
+    //     if (!file) {
+    //       console.error("No file received");
+    //       return null;
+    //     }
+  
+    //     console.log("Uploading video:", file);
+  
+    //     try {
+    //       // Create a FormData object and append the file.
+    //       const formData = new FormData();
+    //       formData.append("file", file);
+    //       formData.append("type", "video");
+  
+    //       // Send the form data to your API endpoint.
+    //       const response = await fetch("/api/r2upload", {
+    //         method: "POST",
+    //         body: formData,
+    //       });
+  
+    //       if (!response.ok) {
+    //         throw new Error(`Upload failed with status ${response.status}`);
+    //       }
+  
+    //       const data = await response.json();
+    //       console.log("Upload response:", data);
+  
+    //       return {
+    //         src: data.secure_url,
+    //         alt: "r2 video",
+    //         sizes: {
+    //           width: data.width,
+    //           height: data.height,
+    //         },
+    //       };
+    //     } catch (error) {
+    //       console.error("Video upload failed:", error);
+    //       return null;
+    //     }
+    //   },
+    //   async onUploadPoster(file){
+    //     if (!file) {
+    //       console.error("No poster file received");
+    //       return null;
+    //     }
+  
+    //     console.log("Uploading poster:", file);
+  
+    //     try {
+    //       // Create FormData for poster image.
+    //       const formData = new FormData();
+    //       formData.append("file", file);
+    //       formData.append("type", "image");
+  
+    //       const response = await fetch("/api/r2upload", {
+    //         method: "POST",
+    //         body: formData,
+    //       });
+  
+    //       if (!response.ok) {
+    //         throw new Error(`Poster upload failed with status ${response.status}`);
+    //       }
+  
+    //       const data = await response.json();
+    //       console.log("Poster upload response:", data);
+  
+    //       return data.secure_url;
+    //     } catch (error) {
+    //       console.error("Poster upload failed:", error);
+    //       return null;
+    //     }
+    //   },
+    // },
   }),
   File.extend({
     options: {

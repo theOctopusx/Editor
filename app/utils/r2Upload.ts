@@ -1,11 +1,12 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-
+import { Buffer } from "buffer";
 export const R2 = {
   BUCKET_NAME: process.env.R2_BUCKET_NAME!,
   ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID!,
   SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY!,
   ACCOUNT_ID: process.env.R2_ACCOUNT_ID!, // Found in R2 dashboard
   ENDPOINT: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+     PUBLIC_URL:process.env.R2_PUBLIC_URL
 };
 
 export type MediaObject = {
@@ -35,11 +36,11 @@ const r2Client = new S3Client({
 
 export const uploadToR2 = async (file: File, type = "image"): Promise<MediaObject> => {
   const buffer = await file.arrayBuffer();
-  const filePath = `${type}s/${Date.now()}-${file.name}`; // Save under "images/" or "videos/"
+  const filePath = `${Date.now()}-${file.name}`; // Save under "images/" or "videos/"
 
   const uploadParams = {
-      Bucket: R2.BUCKET_NAME,
-      Key: filePath,
+      Bucket: 'template',
+      Key:`template/${filePath}`,
     Body: Buffer.from(buffer),
     ContentType: file.type,
 };
@@ -48,8 +49,8 @@ try {
     await r2Client.send(new PutObjectCommand(uploadParams));
 
     return {
-        secure_url: `https://${R2.BUCKET_NAME}.${R2.ACCOUNT_ID}.r2.dev/${filePath}`,
-        url: `https://${R2.BUCKET_NAME}.${R2.ACCOUNT_ID}.r2.dev/${filePath}`,
+        secure_url: `${R2.PUBLIC_URL}/${filePath}`,
+        url: `${R2.PUBLIC_URL}/${filePath}`,
         height: 0, // R2 does not provide metadata, you need external processing
         width: 0,
         asset_id: filePath,
@@ -81,11 +82,11 @@ export const uploadVideoToR2 = async (file: File): Promise<VideoObject> => {
     }
   
     const buffer = await file.arrayBuffer();
-    const filePath = `videos/${Date.now()}-${file.name}`;
+    const filePath = `${Date.now()}-${file.name}`;
   
     const uploadParams = {
       Bucket: R2.BUCKET_NAME,
-      Key: filePath,
+      Key:`template/${filePath}`,
       Body: Buffer.from(buffer),
       ContentType: file.type,
     };
@@ -94,8 +95,8 @@ export const uploadVideoToR2 = async (file: File): Promise<VideoObject> => {
       await r2Client.send(new PutObjectCommand(uploadParams));
   
       return {
-        secure_url: `https://${R2.BUCKET_NAME}.${R2.ACCOUNT_ID}.r2.dev/${filePath}`,
-        url: `https://${R2.BUCKET_NAME}.${R2.ACCOUNT_ID}.r2.dev/${filePath}`,
+        secure_url: `${R2.PUBLIC_URL}/${filePath}`,
+        url: `${R2.PUBLIC_URL}/${filePath}`,
         asset_id: filePath,
         format: file.type.split("/")[1],
         public_id: filePath,
@@ -122,11 +123,11 @@ export const uploadVideoToR2 = async (file: File): Promise<VideoObject> => {
 
   export const uploadFileToR2 = async (file: File): Promise<FileObject> => {
     const buffer = await file.arrayBuffer();
-    const filePath = `files/${Date.now()}-${file.name}`;
+    const filePath = `${Date.now()}-${file.name}`;
   
     const uploadParams = {
       Bucket: R2.BUCKET_NAME,
-      Key: filePath,
+      Key:`template/${filePath}`,
       Body: Buffer.from(buffer),
       ContentType: file.type || "application/octet-stream",
     };
@@ -135,8 +136,8 @@ export const uploadVideoToR2 = async (file: File): Promise<VideoObject> => {
       await r2Client.send(new PutObjectCommand(uploadParams));
   
       return {
-        secure_url: `https://${R2.BUCKET_NAME}.${R2.ACCOUNT_ID}.r2.dev/${filePath}`,
-        url: `https://${R2.BUCKET_NAME}.${R2.ACCOUNT_ID}.r2.dev/${filePath}`,
+        secure_url: `${R2.PUBLIC_URL}/${filePath}`,
+        url: `${R2.PUBLIC_URL}/${filePath}`,
         asset_id: filePath,
         format: file.name.split(".").pop() || "unknown",
         public_id: filePath,
