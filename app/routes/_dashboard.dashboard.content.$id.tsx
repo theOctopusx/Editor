@@ -74,7 +74,6 @@ export const action = async ({ request }: { request: Request }) => {
 
 const PageContent = () => {
   const { data } = useLoaderData();
-  console.log(data);
   // const [trashNotification, setTrashNotification] = useState(data?.isDeleted)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
@@ -100,6 +99,9 @@ const PageContent = () => {
     } catch (error) {
       console.log(error);
     }
+    finally{
+      setRestoreDialogOpen(false)
+    }
   };
   return (
     <div>
@@ -123,7 +125,7 @@ const PageContent = () => {
               >
                 Restore page
               </Button>
-              <Button
+              {/* <Button
                 variant="outline"
                 size="sm"
                 className="bg-transparent text-white border-white hover:bg-white/20 hover:text-white"
@@ -134,7 +136,7 @@ const PageContent = () => {
                 }}
               >
                 Delete from Trash
-              </Button>
+              </Button> */}
             </div>
           </AlertDescription>
         </Alert>
