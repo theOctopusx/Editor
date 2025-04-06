@@ -24,7 +24,6 @@ const NotionLikePageEditor = () => {
 
   const [title, setTitle] = useState<string>(data?.title || "Untitled");
   const [value, setValue] = useState<YooptaContentValue>(data?.content || {});
-  console.log("value", value);
   const [editorId, setEditorId] = useState<string>(generateId());
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
@@ -78,8 +77,9 @@ const NotionLikePageEditor = () => {
   useEffect(() => {
     // * wait for 500ms
     const timeoutId = setTimeout(() => {
+      console.log("Saving data...");
       saveEditorData(value);
-    }, 500);
+    }, 1500);
     return () => clearTimeout(timeoutId);
   }, [value, title]);
 
