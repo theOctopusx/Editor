@@ -73,7 +73,7 @@ export const action = async ({ request }: { request: Request }) => {
 };
 
 const PageContent = () => {
-  const { data } = useLoaderData();
+  const { data } = useLoaderData<typeof loader>();
   // const [trashNotification, setTrashNotification] = useState(data?.isDeleted)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
