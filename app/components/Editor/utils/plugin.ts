@@ -8,15 +8,15 @@ import Video from '@yoopta/video';
 import File from '@yoopta/file';
 import Accordion from '@yoopta/accordion';
 import { NumberedList, BulletedList, TodoList } from '@yoopta/lists';
-import { HeadingOne, HeadingThree, HeadingTwo } from '@yoopta/headings';
+import { HeadingOne, HeadingTwo, HeadingThree } from '@yoopta/headings';
 import Code from '@yoopta/code';
 import Table from '@yoopta/table';
 import Divider from '@yoopta/divider';
-import { uploadToCloudinary } from '~/utils/cloudinary';
 import { PagePlugin } from '../withCustomPlugin/customPlugins/Page';
 
-
+// Define the plugins used in the editor.
 export const plugins = [
+  // Standard text and layout plugins
   Paragraph,
   PagePlugin,
   HeadingOne,
@@ -26,75 +26,168 @@ export const plugins = [
   NumberedList,
   TodoList,
   Accordion,
+
+  // Divider plugin with customized color for the divider line
   Divider.extend({
     elementProps: {
       divider: (props) => ({
         ...props,
-        color: '#007aff',
+        color: '#007aff', // Set the divider color to blue
       }),
     },
   }),
-  Callout,
+
+  // Media and content embedding plugins
+  Callout, 
   Blockquote,
   Table,
-  Image.extend({
-    options: {
-      async onUpload(file): Promise<ImageUploadResponse> {
-        if (!file) {
-          console.error("No file received");
-          return file
-        }
-
-        console.log("Uploading file:", file); // Check if file is received
-
-        try {
-          const data = await uploadToCloudinary(file, 'image');
-          console.log("Upload response:", data); // Check response
-
-          return {
-            src: data.secure_url,
-            alt: 'cloudinary',
-            sizes: {
-              width: data.width,
-              height: data.height,
-            },
-          };
-        } catch (error) {
-          console.error("Image upload failed:", error); // Log upload error
-          return null;
-        }
-      },
-    },
-  }),
-  Video.extend({
-    options: {
-      onUpload: async (file) => {
-        const data = await uploadToCloudinary(file, 'video');
-        return {
-          src: data.secure_url,
-          alt: 'cloudinary',
-          sizes: {
-            width: data.width,
-            height: data.height,
-          },
-        };
-      },
-      onUploadPoster: async (file) => {
-        const image = await uploadToCloudinary(file, 'image');
-        return image.secure_url;
-      },
-    },
-  }),
-  File.extend({
-    options: {
-      onUpload: async (file) => {
-        const response = await uploadToCloudinary(file, 'auto');
-        return { src: response.secure_url, format: response.format, name: response.name, size: response.bytes };
-      },
-    },
-  }),
   Embed,
   Code,
   Link,
-  // ButtonPlugin,
-  ];
+
+  // Image plugin with custom onUpload functionality
+  Image.extend({
+    options: {
+      // Upload handler for image files
+      async onUpload(file): Promise<ImageUploadResponse> {
+        if (!file) {
+          console.error("No file received");
+          return null; // Return null if no file is provided
+        }
+
+        // Prepare form data for the API request
+        const formData = new FormData();
+        formData.append("file", file); // Append the file to be uploaded
+        formData.append("type", "image"); // Append the file type for server processing
+
+        // Send the file to the R2 upload API
+        const response = await fetch("/api/r2upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        // Handle failed upload responses
+        if (!response.ok) {
+          throw new Error(`Upload failed with status ${response.status}`);
+        }
+
+        // Parse and return the response data
+        const data = await response.json();
+        return {
+          src: data.secure_url, // URL to the uploaded image
+          alt: "Uploaded Image", // Alt text for the image
+          sizes: {
+            width: data.width,  // Width of the uploaded image
+            height: data.height, // Height of the uploaded image
+          },
+        };
+      },
+    },
+  }),
+
+  // Video plugin with custom upload and poster upload functionality
+  Video.extend({
+    options: {
+      // Upload handler for video files
+      async onUpload(file) {
+        if (!file) {
+          console.error("No file received");
+          return null; // Return null if no file is provided
+        }
+
+        // Prepare form data for the API request
+        const formData = new FormData();
+        formData.append("file", file); // Append the video file
+        formData.append("type", "video"); // Specify the type as 'video'
+
+        // Send the video file to the R2 upload API
+        const response = await fetch("/api/r2upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        // Handle failed upload responses
+        if (!response.ok) {
+          throw new Error(`Upload failed with status ${response.status}`);
+        }
+
+        // Parse and return the response data
+        const data = await response.json();
+        return {
+          src: data.secure_url, // URL to the uploaded video
+          alt: "Uploaded Video", // Alt text for the video
+          sizes: {
+            width: 600, // Default width for video
+            height: 400, // Default height for video
+          },
+        };
+      },
+
+      // Upload handler for video poster images
+      async onUploadPoster(file) {
+        if (!file) {
+          console.error("No poster file received");
+          return null; // Return null if no file is provided
+        }
+
+        // Prepare form data for the poster upload
+        const formData = new FormData();
+        formData.append("file", file); // Append the poster file
+        formData.append("type", "image"); // Specify the type as 'image'
+
+        // Send the poster file to the R2 upload API
+        const response = await fetch("/api/r2upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        // Handle failed upload responses
+        if (!response.ok) {
+          throw new Error(`Poster upload failed with status ${response.status}`);
+        }
+
+        // Parse and return the poster URL
+        const data = await response.json();
+        return data.secure_url; // Return the secure URL of the uploaded poster
+      },
+    },
+  }),
+
+  // File plugin with custom upload functionality
+  File.extend({
+    options: {
+      // Upload handler for general files
+      async onUpload(file) {
+        if (!file) {
+          console.error("No file received");
+          return null; // Return null if no file is provided
+        }
+
+        // Prepare form data for the API request
+        const formData = new FormData();
+        formData.append("file", file); // Append the file to be uploaded
+        formData.append("type", "file"); // Specify the file type for server processing
+
+        // Send the file to the R2 upload API
+        const response = await fetch("/api/r2upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        // Handle failed upload responses
+        if (!response.ok) {
+          throw new Error(`Upload failed with status ${response.status}`);
+        }
+
+        // Parse and return the response data
+        const data = await response.json();
+        return {
+          src: data.secure_url, // URL to the uploaded file
+          format: data.format,  // Format of the file (e.g., pdf, docx)
+          name: data.name,      // Name of the uploaded file
+          size: data.bytes,     // Size of the uploaded file in bytes
+        };
+      },
+    },
+  }),
+];
