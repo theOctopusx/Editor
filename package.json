@@ -2,12 +2,13 @@
   "name": "notion-like-editor",
   "private": true,
   "sideEffects": false,
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "build": "remix vite:build",
     "dev": "remix vite:dev",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "PORT=3000 npx remix-serve ./build/server/index.js",
+    "start": "npx remix-serve ./build/server/index.js",
     "typecheck": "tsc"
   },
   "dependencies": {
