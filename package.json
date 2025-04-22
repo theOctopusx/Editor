@@ -2,7 +2,7 @@
   "name": "notion-like-editor",
   "private": true,
   "sideEffects": false,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "build": "remix vite:build",
