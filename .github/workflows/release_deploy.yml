@@ -26,11 +26,11 @@ jobs:
         run: pnpm build
 
       - name: Create tarball
-        run: tar -czf dist.tar.gz -C dist .
+        run: tar -czf build.tar.gz -C build .
 
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           TAG=${{ github.ref_name }}
-          gh release create $TAG --title "Release $TAG" --notes "Automated release for $TAG" dist.tar.gz
+          gh release create $TAG --title "Release $TAG" --notes "Automated release for $TAG" build.tar.gz
