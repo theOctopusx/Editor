@@ -34,6 +34,15 @@ warning() {
   echo "$msg" >>"$LOG_FILE"
 }
 
+# Get Tag
+if [ -z "$1" ]; then
+  TAG=""
+  log "No tag specified, deploying latest from main branch"
+else
+  TAG="$1"
+  log "Deploying version: $TAG"
+fi
+
 # Start deployment
 log "Starting deployment"
 log "Deployment log will be saved to: $LOG_FILE"
@@ -47,16 +56,31 @@ log "Setting up SSH agent"
 eval "$(ssh-agent -s)" || warning "SSH agent initialization had issues"
 ssh-add "$SSH_KEY" || error "Failed to add SSH key $SSH_KEY"
 
-# Pull latest code
-log "Checking out development branch"
-git checkout development || error "Failed to checkout development branch"
+# Checkout the appropriate version
+if [ -z "$TAG" ]; then
+  # Pull the latest code from main branch
+  log "Checking out main branch"
+  git checkout main || error "Failed to checkout main branch"
 
-log "Pulling latest changes"
-git pull || error "Failed to pull latest changes"
+  log "Pulling latest changes"
+  git pull || error "Failed to pull latest changes"
+else
+  # Update list of tags from remote
+  log "Fetching all tags"
+  git fetch --tags || error "Failed to fetch tags"
+
+  # Check if the tag exists
+  if git rev-parse "$TAG" >/dev/null 2>&1; then
+    log "Tag $TAG found in git history"
+    git checkout "$TAG" || error "Failed to checkout tag: $TAG"
+  else
+    error "Tag $TAG not found in git history"
+  fi
+fi
 
 # Install dependencies
 log "Installing dependencies"
-pnpm install || error "Failed to install dependencies"
+pnpm install --prod || error "Failed to install dependencies"
 
 # Build application
 log "Building application"
@@ -64,7 +88,7 @@ pnpm build || error "Failed to build application"
 
 # Reload services
 log "Reloading PM2"
-pm2 reload "$PM2_APP_NAME" || error "Failed to reload PM2 application $PM2_APP_NAME"
+pm2 reload "$PM2_APP_NAME" || pm2 start ecosystem.config.cjs || error "Failed to reload PM2 application $PM2_APP_NAME"
 
 log "Reloading Nginx"
 sudo systemctl reload nginx || error "Failed to reload Nginx"
