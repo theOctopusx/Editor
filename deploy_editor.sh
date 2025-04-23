@@ -80,7 +80,7 @@ fi
 
 # Install dependencies
 log "Installing dependencies"
-pnpm install --prod || error "Failed to install dependencies"
+pnpm install || error "Failed to install dependencies"
 
 # Build application
 log "Building application"
